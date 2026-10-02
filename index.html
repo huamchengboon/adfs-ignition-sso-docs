@@ -1,0 +1,1178 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Windows SSO for Ignition Perspective — Setup &amp; Troubleshooting Guide</title>
+<style>
+:root{
+  --bg:#f7f8fa; --panel:#ffffff; --ink:#1b2430; --muted:#5b6675; --line:#dfe3ea;
+  --accent:#1d5fd1; --accent-ink:#ffffff; --code-bg:#0f1722; --code-ink:#e6edf6; --code-line:#223044;
+  --ok:#17803d; --ok-bg:#e6f5ec; --warn:#a15c00; --warn-bg:#fff3de; --bad:#b42318; --bad-bg:#fde8e6;
+  --tip:#0a6b7c; --tip-bg:#e3f4f7; --note:#4a4fa3; --note-bg:#eceefb; --shadow:0 1px 2px rgba(16,24,40,.06),0 1px 3px rgba(16,24,40,.08);
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#0e131b; --panel:#151c27; --ink:#e7edf5; --muted:#9aa7b8; --line:#263143;
+    --accent:#6ea2ff; --accent-ink:#0b1220; --code-bg:#0a0f17; --code-ink:#dfe8f3; --code-line:#1c2736;
+    --ok:#5fd08a; --ok-bg:#12281b; --warn:#f0b35a; --warn-bg:#2c2111; --bad:#ff8b80; --bad-bg:#2f1715;
+    --tip:#68d2e3; --tip-bg:#0f2a30; --note:#a9adff; --note-bg:#1a1d3a; --shadow:none;
+  }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:16px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--accent)}
+code,pre,kbd{font-family:ui-monospace,"Cascadia Code",Consolas,Menlo,monospace}
+code{font-size:.9em;background:color-mix(in srgb,var(--line) 55%,transparent);padding:.1em .35em;border-radius:5px}
+.layout{display:grid;grid-template-columns:290px minmax(0,1fr);max-width:1400px;margin:0 auto}
+nav.toc{position:sticky;top:0;align-self:start;height:100vh;overflow:auto;padding:22px 16px 40px 20px;border-right:1px solid var(--line);font-size:14px}
+nav.toc h2{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:18px 0 6px}
+nav.toc a{display:block;padding:4px 8px;margin:1px 0;border-radius:6px;color:var(--ink);text-decoration:none}
+nav.toc a:hover{background:var(--line)}
+nav.toc a.active{background:var(--accent);color:var(--accent-ink)}
+nav.toc .brand{font-weight:700;font-size:15px;line-height:1.3;margin-bottom:4px}
+nav.toc .sub{color:var(--muted);font-size:12px;margin-bottom:12px}
+main{padding:28px clamp(16px,4vw,48px) 80px;min-width:0}
+header.hero{background:linear-gradient(135deg,#123a8a,#1d5fd1 60%,#2a7de1);color:#fff;border-radius:14px;padding:32px clamp(18px,3vw,36px);margin-bottom:28px}
+header.hero h1{margin:0 0 8px;font-size:clamp(24px,3.4vw,34px);line-height:1.2}
+header.hero p{margin:0;max-width:70ch;opacity:.95}
+header.hero .meta{margin-top:16px;display:flex;flex-wrap:wrap;gap:8px}
+.pill{display:inline-block;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);color:#fff;border-radius:999px;padding:3px 11px;font-size:13px}
+section{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:22px clamp(16px,2.6vw,30px);margin:0 0 22px;box-shadow:var(--shadow)}
+section>h2{margin:0 0 4px;font-size:24px;line-height:1.25}
+section>.lead{color:var(--muted);margin:0 0 16px}
+h3{margin:26px 0 8px;font-size:18px}
+h4{margin:18px 0 6px;font-size:15px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.stepno{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:15px;margin-right:10px;vertical-align:middle}
+table{width:100%;border-collapse:collapse;margin:10px 0 16px;font-size:14.5px}
+th,td{text-align:left;vertical-align:top;padding:8px 10px;border-bottom:1px solid var(--line)}
+th{background:color-mix(in srgb,var(--line) 45%,transparent);font-weight:650}
+td code{white-space:pre-wrap;word-break:break-word}
+.tablewrap{overflow-x:auto}
+.callout{border-left:5px solid var(--note);background:var(--note-bg);padding:12px 16px;border-radius:8px;margin:14px 0}
+.callout>b:first-child{display:block;margin-bottom:2px}
+.callout.tip{border-color:var(--tip);background:var(--tip-bg)}
+.callout.warn{border-color:var(--warn);background:var(--warn-bg)}
+.callout.bad{border-color:var(--bad);background:var(--bad-bg)}
+.callout.ok{border-color:var(--ok);background:var(--ok-bg)}
+.codewrap{position:relative;margin:10px 0 16px}
+.codewrap .label{position:absolute;top:0;left:14px;transform:translateY(-50%);background:var(--code-line);color:var(--code-ink);font-size:11.5px;letter-spacing:.04em;padding:2px 9px;border-radius:999px}
+pre{margin:0;background:var(--code-bg);color:var(--code-ink);padding:18px 16px 14px;border-radius:10px;overflow:auto;font-size:13.5px;line-height:1.5;border:1px solid var(--code-line)}
+pre code{background:none;padding:0;font-size:inherit;color:inherit}
+button.copy{position:absolute;top:8px;right:8px;background:var(--code-line);color:var(--code-ink);border:1px solid #33465f;border-radius:7px;padding:3px 10px;font-size:12px;cursor:pointer}
+button.copy:hover{background:#2d3f57}
+ol.steps{padding-left:1.2em}
+ol.steps>li{margin:7px 0}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.card{border:1px solid var(--line);border-radius:10px;padding:14px 16px;background:color-mix(in srgb,var(--panel) 92%,var(--line))}
+.card h4{margin-top:0}
+details{border:1px solid var(--line);border-radius:10px;margin:10px 0;background:var(--panel)}
+details>summary{cursor:pointer;padding:11px 14px;font-weight:600;list-style:none;display:flex;gap:10px;align-items:flex-start}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"▸";color:var(--muted);flex:none;margin-top:1px}
+details[open]>summary::before{content:"▾"}
+details .body{padding:2px 16px 14px}
+details .tag{font-size:11.5px;font-weight:600;border-radius:999px;padding:1px 9px;margin-left:auto;flex:none;border:1px solid var(--line);color:var(--muted)}
+.dl{display:grid;grid-template-columns:max-content 1fr;gap:4px 14px;margin:8px 0}
+.dl dt{font-weight:650;color:var(--muted)}
+.dl dd{margin:0}
+.check li{list-style:none;margin-left:-1.2em}
+.check li::before{content:"☐ ";color:var(--muted)}
+#search{width:100%;padding:9px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;margin:6px 0 10px}
+svg text{font-family:system-ui,"Segoe UI",sans-serif}
+.diagram{width:100%;height:auto;margin:8px 0}
+.box{fill:var(--panel);stroke:var(--line);stroke-width:1.5}
+.boxA{fill:var(--tip-bg);stroke:var(--tip);stroke-width:1.5}
+.boxB{fill:var(--note-bg);stroke:var(--note);stroke-width:1.5}
+.boxC{fill:var(--warn-bg);stroke:var(--warn);stroke-width:1.5}
+.dt{fill:var(--ink);font-size:14px;font-weight:650}
+.ds{fill:var(--muted);font-size:12px}
+.ln{stroke:var(--muted);stroke-width:1.6;fill:none}
+.lnA{stroke:var(--accent);stroke-width:2;fill:none}
+footer{color:var(--muted);font-size:13px;text-align:center;margin-top:30px}
+@media (max-width:1000px){
+  .layout{grid-template-columns:1fr}
+  nav.toc{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+}
+@media print{
+  nav.toc,button.copy,#search{display:none}
+  .layout{display:block}
+  section{box-shadow:none;break-inside:avoid-page}
+  details{border:0} details>summary::before{content:""}
+  details>.body{display:block}
+  pre{white-space:pre-wrap;color:#000;background:#f4f4f4;border:1px solid #bbb}
+  header.hero{background:#fff;color:#000;border:1px solid #bbb}
+  .pill{color:#000;border-color:#999;background:#fff}
+}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<nav class="toc" aria-label="Contents">
+  <div class="brand">Windows SSO for Ignition Perspective</div>
+  <div class="sub">AD FS · AD CS · DNS · Ignition 8.3</div>
+  <h2>Understand</h2>
+  <a href="#overview">1 · Overview</a>
+  <a href="#values">2 · Values used (replace these)</a>
+  <a href="#flow">3 · How a login works</a>
+  <a href="#prereq">4 · Prerequisites &amp; decisions</a>
+  <h2>Build (in order)</h2>
+  <a href="#s1">Step 1 · DNS</a>
+  <a href="#s2">Step 2 · Certificates</a>
+  <a href="#s3">Step 3 · AD FS install</a>
+  <a href="#s4">Step 4 · Register Ignition in AD FS</a>
+  <a href="#s5">Step 5 · Group Policy (browsers)</a>
+  <a href="#s6">Step 6 · Firewall</a>
+  <a href="#s7">Step 7 · Ignition install + HTTPS</a>
+  <a href="#s8">Step 8 · Ignition identity provider</a>
+  <a href="#s9">Step 9 · Project, login rule, view</a>
+  <a href="#s10">Step 10 · Designer (Perspective fix)</a>
+  <a href="#s11">Step 11 · Client PC</a>
+  <h2>Operate</h2>
+  <a href="#verify">Verification checklist</a>
+  <a href="#trouble">Troubleshooting</a>
+  <a href="#prod">Production &amp; security notes</a>
+  <h2>Appendix</h2>
+  <a href="#appx-script">A · Rebuild script</a>
+  <a href="#appx-view">B · View generator</a>
+  <a href="#appx-files">C · Files &amp; paths</a>
+  <a href="#refs">D · References</a>
+</nav>
+
+<main>
+
+<header class="hero">
+  <h1>Windows Single Sign-On for Ignition Perspective</h1>
+  <p>How a domain user opens an Ignition Perspective page and is signed in automatically — no username or password — using Active Directory, AD FS (OpenID Connect) and Kerberos. Complete build record, replication steps and a troubleshooting guide from the working lab.</p>
+  <div class="meta">
+    <span class="pill">Windows Server 2025</span>
+    <span class="pill">AD DS · AD CS · DNS · AD FS</span>
+    <span class="pill">Ignition 8.3.9 / Perspective 3.3.9</span>
+    <span class="pill">Built 2 Oct 2026</span>
+    <span class="pill">Status: working ✔</span>
+  </div>
+</header>
+<div class="callout warn" style="margin:0 0 22px"><b>Sanitized public copy</b>Host names, IP addresses, the domain and certificate thumbprints in this copy are <b>placeholders</b> (<code>example.local</code>, <code>DC01</code>, <code>10.0.0.10</code>, ...). Replace them with your own values (section 2 lists them). Nothing here is a real credential.</div>
+
+<section id="overview">
+  <h2>1 · Overview</h2>
+  <p class="lead">What was built, and the one design decision everything else follows from.</p>
+
+  <div class="callout warn">
+    <b>Key fact: Ignition cannot do Kerberos / "Windows login" by itself.</b>
+    The old “SSO Enabled” option of the Active Directory user source was disabled in Ignition 8.1.17 for a security vulnerability and is deprecated. The supported way to get silent Windows sign-in is to put an <b>external identity provider (IdP)</b> in front of Ignition. Here that IdP is <b>AD FS</b>, speaking <b>OpenID Connect</b>. AD FS is the component that actually performs the Windows (Kerberos) authentication; Ignition only trusts the token AD FS returns.
+  </div>
+
+  <h3>What you end up with</h3>
+  <ul>
+    <li>An AD domain controller that also hosts DNS, an Enterprise Certificate Authority and AD FS.</li>
+    <li>Two TLS certificates issued by your own CA: one for AD FS, one for Ignition (both with the right Subject Alternative Names).</li>
+    <li>An Ignition 8.3 Gateway on HTTPS (port 8043) using that certificate and trusting your CA.</li>
+    <li>An OIDC client in AD FS for Ignition, and an <code>ADFS</code> identity provider in Ignition mapped to AD attributes.</li>
+    <li>A Perspective project that <b>requires authentication</b> and shows who is signed in.</li>
+    <li>A Group Policy that makes domain browsers send Windows credentials to AD FS automatically.</li>
+  </ul>
+
+  <h3>Architecture</h3>
+  <svg class="diagram" viewBox="0 0 920 360" role="img" aria-label="Architecture diagram">
+    <defs><marker id="ar" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="currentColor" style="color:var(--accent)"/></marker></defs>
+    <rect class="boxB" x="20" y="130" width="190" height="110" rx="12"/>
+    <text class="dt" x="115" y="165" text-anchor="middle">Client PC</text>
+    <text class="ds" x="115" y="186" text-anchor="middle">domain-joined, Edge/Chrome</text>
+    <text class="ds" x="115" y="204" text-anchor="middle">signed in as EXAMPLE\user</text>
+    <text class="ds" x="115" y="222" text-anchor="middle">GPO: AD FS = Intranet zone</text>
+
+    <rect class="boxA" x="365" y="20" width="230" height="110" rx="12"/>
+    <text class="dt" x="480" y="52" text-anchor="middle">Ignition Gateway 8.3</text>
+    <text class="ds" x="480" y="73" text-anchor="middle">https://ignition.example.local:8043</text>
+    <text class="ds" x="480" y="91" text-anchor="middle">Perspective project “SSOTest”</text>
+    <text class="ds" x="480" y="109" text-anchor="middle">IdP “ADFS” (OIDC client)</text>
+
+    <rect class="boxC" x="365" y="230" width="230" height="110" rx="12"/>
+    <text class="dt" x="480" y="262" text-anchor="middle">AD FS (federation service)</text>
+    <text class="ds" x="480" y="283" text-anchor="middle">https://adfs.example.local</text>
+    <text class="ds" x="480" y="301" text-anchor="middle">gMSA EXAMPLE\adfs-svc$</text>
+    <text class="ds" x="480" y="319" text-anchor="middle">Windows Integrated Auth (Kerberos)</text>
+
+    <rect class="box" x="710" y="20" width="190" height="90" rx="12"/>
+    <text class="dt" x="805" y="52" text-anchor="middle">DNS server</text>
+    <text class="ds" x="805" y="73" text-anchor="middle">adfs / ignition → DC IP</text>
+    <text class="ds" x="805" y="91" text-anchor="middle">(AD-integrated zone)</text>
+
+    <rect class="box" x="710" y="140" width="190" height="90" rx="12"/>
+    <text class="dt" x="805" y="172" text-anchor="middle">AD CS (example-CA)</text>
+    <text class="ds" x="805" y="193" text-anchor="middle">issues both TLS certificates</text>
+
+    <rect class="box" x="710" y="250" width="190" height="90" rx="12"/>
+    <text class="dt" x="805" y="282" text-anchor="middle">AD DS / KDC</text>
+    <text class="ds" x="805" y="303" text-anchor="middle">users, groups, Kerberos tickets</text>
+
+    <path class="lnA" d="M210 170 C 300 140, 300 80, 365 75" marker-end="url(#ar)"/>
+    <text class="ds" x="268" y="104" text-anchor="middle">① open page</text>
+    <path class="lnA" d="M365 100 C 300 150, 300 260, 365 280" marker-end="url(#ar)"/>
+    <text class="ds" x="296" y="205" text-anchor="middle">② redirect</text>
+    <path class="lnA" d="M210 205 C 300 250, 300 290, 365 295" marker-end="url(#ar)"/>
+    <text class="ds" x="268" y="276" text-anchor="middle">③ Kerberos ticket</text>
+    <path class="ln" d="M595 300 L710 295" marker-end="url(#ar)"/>
+    <path class="ln" d="M595 60 L710 60"/>
+    <path class="ln" d="M595 270 C 650 230, 650 200, 710 190"/>
+    <text class="ds" x="652" y="318" text-anchor="middle">verify ticket,</text><text class="ds" x="652" y="333" text-anchor="middle">read groups</text>
+  </svg>
+  <p style="color:var(--muted);font-size:14px">Everything in this lab (DC, CA, DNS, AD FS, Ignition) runs on <b>one</b> server, <code>DC01</code>. That is fine for a lab; see <a href="#prod">Production notes</a> for how to split it.</p>
+</section>
+
+<section id="values">
+  <h2>2 · Values used in this build</h2>
+  <p class="lead">Everything below is a placeholder you will replace when you replicate this in another domain. Keep the same <i>roles</i>, change the <i>values</i>.</p>
+  <div class="tablewrap">
+  <table>
+    <tr><th>Item</th><th>Value in this lab</th><th>Notes</th></tr>
+    <tr><td>Operating system</td><td>Windows Server 2025 Standard (build 26100), Hyper-V VM, 7 GB RAM</td><td>Server 2025 disables RC4 for Kerberos by default — matters for the gMSA (see Step 3).</td></tr>
+    <tr><td>AD domain / NetBIOS</td><td><code>example.local</code> / <code>EXAMPLE</code></td><td>Forest and domain level Windows2025.</td></tr>
+    <tr><td>Server (DC + CA + AD FS + Ignition)</td><td><code>DC01</code>, IPv4 <code>10.0.0.10</code></td><td>Second adapter has only a 169.254 link-local address — ignore it.</td></tr>
+    <tr><td>Enterprise CA</td><td><code>example-CA</code> (config: <code>DC01.example.local\example-CA</code>)</td><td>Template used for both server certs: <b>WebServer</b>.</td></tr>
+    <tr><td>AD FS service name</td><td><code>adfs.example.local</code> (display “Example SSO”)</td><td>Must match the certificate subject <i>and</i> SAN. Cannot be changed after install without rebuilding the farm.</td></tr>
+    <tr><td>AD FS service account</td><td>gMSA <code>EXAMPLE\adfs-svc$</code></td><td>SPN <code>host/adfs.example.local</code> is registered on it automatically.</td></tr>
+    <tr><td>AD FS database</td><td>Windows Internal Database (WID)</td><td>Default for a one-node farm.</td></tr>
+    <tr><td>AD FS service certificate</td><td>CN=<code>adfs.example.local</code>, SAN adfs + <code>certauth.adfs.example.local</code>, thumbprint <code>A1B2C3D4E5F60718293A4B5C6D7E8F9012345678</code>, expires 2028-10-01</td><td>In <code>LocalMachine\My</code>.</td></tr>
+    <tr><td>Ignition</td><td>8.3.9, service <code>Ignition</code>, install dir <code>C:\Program Files\Inductive Automation\Ignition</code></td><td>Trial mode (2 h timer, resettable) unless licensed.</td></tr>
+    <tr><td>Ignition URL</td><td><code>https://ignition.example.local:8043</code></td><td>HTTP <code>8088</code> stays closed in the firewall; Gateway Network port <code>8060</code>.</td></tr>
+    <tr><td>Ignition certificate</td><td>CN=<code>ignition.example.local</code>, SAN <code>dns:ignition.example.local</code>, expires 2028-10-01</td><td>Created with Ignition’s own <code>keytool</code> (key must be exportable to PEM).</td></tr>
+    <tr><td>OIDC client (AD FS side)</td><td>Application group “Ignition SCADA”, client id <code>ignition-perspective</code>, confidential client with secret</td><td>Secret is shown once. Stored in <code>C:\adfs-setup\ignition-client-secret.txt</code>.</td></tr>
+    <tr><td>Redirect URI</td><td><code>https://ignition.example.local:8043/data/federate/callback/oidc</code></td><td>Must match Ignition’s own value character for character.</td></tr>
+    <tr><td>Ignition identity provider</td><td>name <code>ADFS</code>, type OpenID Connect 1.0</td><td>Imported from <code>https://adfs.example.local/adfs/.well-known/openid-configuration</code>.</td></tr>
+    <tr><td>Ignition project</td><td><code>SSOTest</code>, view <code>Main</code>, URL <code>/data/perspective/client/SSOTest</code></td><td>Requires the <b>Authenticated</b> security level.</td></tr>
+    <tr><td>Test user</td><td><code>ssotest@example.local</code> (sAMAccountName <code>ssotest</code>), in Domain Users</td><td>Password stored in <code>C:\adfs-setup\ssotest-password.txt</code>.</td></tr>
+    <tr><td>Group Policy</td><td><code>SSO - AD FS Intranet Zone</code>, linked at the domain root</td><td>Intranet-zone mapping + Edge/Chrome <code>AuthServerAllowlist</code>.</td></tr>
+    <tr><td>Windows Admin Center</td><td>moved from 443 to <code>6443</code></td><td>AD FS needs 443. Backup of the old config: <code>C:\adfs-setup\appsettings.json.bak</code>.</td></tr>
+    <tr><td>Working folder</td><td><code>C:\adfs-setup</code></td><td>Scripts <code>step1…step10.ps1</code> + logs, exported certs, backups. See <a href="#appx-files">Appendix C</a>.</td></tr>
+  </table>
+  </div>
+</section>
+
+<section id="flow">
+  <h2>3 · How a login works</h2>
+  <p class="lead">Understanding this sequence makes every problem below easy to place.</p>
+  <ol class="steps">
+    <li>The user opens <code>https://ignition.example.local:8043/data/perspective/client/SSOTest</code>. The project requires the <b>Authenticated</b> security level, so Perspective shows <i>“You must log in to continue”</i> → <b>Continue to log in</b>.</li>
+    <li>Ignition redirects the browser to AD FS: <code>/adfs/oauth2/authorize/</code> with <code>client_id=ignition-perspective</code>, the redirect URI and scopes <code>openid profile email allatclaims</code>.</li>
+    <li>AD FS answers with its <b>Windows-integrated</b> endpoint <code>/adfs/oauth2/authorize/wia</code>. That only works silently if (a) the browser considers AD FS an <b>intranet</b> site, (b) the browser is allowed to use Negotiate/Kerberos to that host, and (c) AD FS accepts that browser’s User-Agent for WIA.</li>
+    <li>The browser requests a Kerberos service ticket for <code>host/adfs.example.local</code> (the SPN on the gMSA) using the user’s Windows logon, and presents it. AD FS validates it with AD.</li>
+    <li>AD FS builds the token using the <b>issuance transform rules</b> (UPN, e-mail, sAMAccountName as <code>unique_name</code>, AD groups as <code>role</code>) and sends the browser back to the Ignition redirect URI with an authorization code (form post).</li>
+    <li>Ignition’s Gateway — server to server — calls AD FS’s token endpoint (needs the client secret and must trust the AD FS certificate), validates the signed ID token, and applies <b>User Attribute Mapping</b>.</li>
+    <li>The Perspective session now has <code>session.props.auth.user.userName</code>, <code>.email</code>, <code>.roles</code> and the view renders them.</li>
+  </ol>
+  <div class="callout tip"><b>Where each failure shows up</b>
+    Steps 1–2 failing = Ignition/IdP config. Step 3 stuck on a password form = browser/GPO/User-Agent/SPN. Step 6 failing = Ignition cannot reach or trust AD FS (DNS, CA trust, secret). That mapping is how the Troubleshooting section is organised.
+  </div>
+</section>
+
+<section id="prereq">
+  <h2>4 · Prerequisites &amp; decisions</h2>
+  <p class="lead">Check these before you start. The reasons are what you will need when something is different in your environment.</p>
+  <div class="cols">
+    <div class="card"><h4>Needed</h4>
+      <ul>
+        <li>An AD domain, a DNS zone for it, and an <b>Enterprise Root/Sub CA</b> (AD CS) whose certificate is trusted by all domain machines (automatic for an Enterprise CA).</li>
+        <li>An elevated <b>Windows PowerShell 5.1</b> session as a domain admin (an un-elevated admin token gives <i>Access denied</i> for DNS/CA/AD FS commands).</li>
+        <li>The <b>Ignition 8.3 Windows installer</b> and the <b>Designer Launcher</b> (both from inductiveautomation.com; the download page needs a registration form).</li>
+        <li>Clients that are <b>domain-joined</b>, use your DNS, and where the user logs in with a domain account.</li>
+        <li>Accurate time everywhere (Kerberos tolerates only ~5 min skew).</li>
+      </ul>
+    </div>
+    <div class="card"><h4>Decisions made here</h4>
+      <ul>
+        <li><b>OIDC, not SAML.</b> Ignition supports both; OIDC needs no extra signing-certificate handling.</li>
+        <li><b>Use host names, never IPs.</b> Kerberos and the intranet-zone rule only work with a DNS name (<code>adfs.…</code>, <code>ignition.…</code>).</li>
+        <li><b>Ignition on 8043.</b> AD FS must own 443 on its host, so the one-server lab puts Ignition on 8043 and Windows Admin Center on 6443.</li>
+        <li><b>gMSA</b> as the AD FS service account (no password to manage).</li>
+        <li><b>Server certs from your own CA</b>, with SAN — modern browsers and Java both require SAN.</li>
+        <li>No Ignition “user source” for SSO: in 8.3 an external IdP maps claims to users and roles directly.</li>
+      </ul>
+    </div>
+    <div class="card"><h4>Ports</h4>
+      <div class="tablewrap"><table>
+        <tr><th>Port</th><th>Used by</th></tr>
+        <tr><td>443/tcp</td><td>AD FS (HTTPS, WIA)</td></tr>
+        <tr><td>8043/tcp</td><td>Ignition HTTPS (opened in firewall)</td></tr>
+        <tr><td>8088/tcp</td><td>Ignition HTTP — left closed</td></tr>
+        <tr><td>8060/tcp</td><td>Ignition Gateway Network</td></tr>
+        <tr><td>6443/tcp</td><td>Windows Admin Center (moved)</td></tr>
+        <tr><td>53, 88, 389, 636…</td><td>DNS, Kerberos, LDAP (domain controller roles)</td></tr>
+      </table></div>
+    </div>
+  </div>
+  <div class="callout note"><b>Convention in this guide</b>
+    <code>PS&gt;</code> blocks are Windows PowerShell 5.1, run <b>elevated</b>, on the server unless stated. Replace the values from <a href="#values">section 2</a>. Anything that contains a password is stored to a file with a restrictive ACL — it is never typed into a command line you will keep.
+  </div>
+</section>
+
+<section id="s1">
+  <h2><span class="stepno">1</span>DNS</h2>
+  <p class="lead">Create the two host names, and make the server use its own DNS.</p>
+
+  <p>Kerberos, the browser’s intranet-zone decision, and both TLS certificates all depend on host <i>names</i>. Create an A record for each service in your AD-integrated zone, both pointing at the server.</p>
+  <div class="codewrap"><span class="label">PS&gt; on the DC</span><button class="copy">Copy</button><pre><code>$zone = 'example.local'
+$ip   = '10.0.0.10'
+foreach ($h in 'adfs','ignition') {
+  if (-not (Get-DnsServerResourceRecord -ZoneName $zone -Name $h -ErrorAction SilentlyContinue)) {
+    Add-DnsServerResourceRecordA -ZoneName $zone -Name $h -IPv4Address $ip
+  }
+}
+Get-DnsServerResourceRecord -ZoneName $zone -RRType A | Where HostName -in 'adfs','ignition'</code></pre></div>
+
+  <h3>Make sure the server resolves through itself</h3>
+  <p>A domain controller must list <b>itself</b> first in its DNS client settings. In this lab it pointed at <code>10.0.0.1</code> (the Hyper-V host), so the DC’s own scripts could not resolve <code>adfs.example.local</code> even though its DNS server answered correctly.</p>
+  <div class="codewrap"><span class="label">PS&gt;</span><button class="copy">Copy</button><pre><code>Set-DnsClientServerAddress -InterfaceAlias 'Ethernet 2' -ServerAddresses '10.0.0.10','10.0.0.1'
+Clear-DnsClientCache
+Resolve-DnsName adfs.example.local     # must return 10.0.0.10
+Resolve-DnsName ignition.example.local</code></pre></div>
+  <div class="callout tip"><b>Clients too</b> Every client (and any separate Ignition server) must use this DNS server, otherwise it cannot resolve <code>adfs.example.local</code>. The public domain <code>ignition.example.com</code> that was used at first is not part of this setup; use a name inside your AD DNS zone.</div>
+</section>
+
+<section id="s2">
+  <h2><span class="stepno">2</span>Certificates</h2>
+  <p class="lead">Two server certificates from your CA: one for AD FS, one for Ignition. The two are created differently on purpose.</p>
+
+  <div class="callout note"><b>Why two different methods?</b>
+    The built-in <b>WebServer</b> template is <i>machine-only</i> and its private key is <i>not exportable</i>. That is perfect for AD FS (the key stays in the Windows store). Ignition, however, is a Java application and needs the key as a file — so its key and request are created with Ignition’s own <code>keytool</code>, and the CA only signs it.
+  </div>
+
+  <h3>2.1 Let the server request from the WebServer template</h3>
+  <p>The first attempt failed with <code>CERTSRV_E_TEMPLATE_DENIED</code> because <code>Get-Certificate … -CertStoreLocation Cert:\LocalMachine\My</code> enrolls as the <b>computer account</b>, and that account was not allowed to enroll. Grant <b>Domain Controllers</b> (the group the DC’s computer account is in) the <i>Enroll</i> right.</p>
+  <div class="codewrap"><span class="label">PS&gt; elevated, Enterprise Admin</span><button class="copy">Copy</button><pre><code>Import-Module ActiveDirectory
+$cfg = (Get-ADRootDSE).configurationNamingContext
+$dn  = "CN=WebServer,CN=Certificate Templates,CN=Public Key Services,CN=Services,$cfg"
+dsacls $dn /G "EXAMPLE\Domain Controllers:CA;Enroll"
+# Verify the template is published on the CA
+certutil -CATemplates | Select-String WebServer</code></pre></div>
+  <div class="callout warn"><b>Note</b> Granting Enroll on a CA template is a PKI permission change. In this lab “Domain Admins” already had Enroll (it was granted twice by mistake, which is harmless). Remove duplicates in <code>certtmpl.msc → WebServer → Security</code> if you want it tidy. Do <i>not</i> “fix” the problem by enabling <code>EDITF_ATTRIBUTESUBJECTALTNAME2</code> on the CA — that is a well-known privilege-escalation hole.</div>
+
+  <h3>2.2 AD FS certificate (machine store)</h3>
+  <p>AD FS requires the certificate subject <b>and</b> a SAN equal to the federation service name. <code>certauth.adfs…</code> is only needed for certificate authentication; it is harmless to include.</p>
+  <div class="codewrap"><span class="label">PS&gt;</span><button class="copy">Copy</button><pre><code>Get-Certificate -Template WebServer `
+  -DnsName 'adfs.example.local','certauth.adfs.example.local' `
+  -SubjectName 'CN=adfs.example.local' `
+  -CertStoreLocation Cert:\LocalMachine\My
+
+Get-ChildItem Cert:\LocalMachine\My | Where Subject -eq 'CN=adfs.example.local' |
+  Select Subject,Thumbprint,NotAfter,HasPrivateKey,DnsNameList | fl</code></pre></div>
+  <p>Write the <b>thumbprint</b> down — <code>Install-AdfsFarm</code> in Step 3 needs it (here <code>A1B2C3D4E5F60718293A4B5C6D7E8F9012345678</code>).</p>
+
+  <h3>2.3 Export the CA certificate (clients and Ignition need it)</h3>
+  <div class="codewrap"><span class="label">PS&gt;</span><button class="copy">Copy</button><pre><code>$ca = Get-ChildItem Cert:\LocalMachine\My | Where Subject -like 'CN=example-CA*' | Select -First 1
+Export-Certificate -Cert $ca -FilePath C:\adfs-setup\example-ca.cer -Type CERT</code></pre></div>
+  <div class="callout tip"><b>Gotcha</b> <code>certutil -ca.cert file.cer</code> fails inside PowerShell with “Expected no more than 1 args” because the dot is parsed as a member access. Use <code>Export-Certificate</code> as above, or quote it: <code>certutil '-ca.cert' file.cer</code>.</div>
+
+  <h3>2.4 Ignition certificate (key made by keytool, signed by the CA)</h3>
+  <p>Do this <b>after</b> Ignition is installed (Step 7), because it uses Ignition’s bundled Java <code>keytool</code>. It is listed here so all certificate work is in one place.</p>
+
+  <h4>a) Create the key pair and CSR with a SAN</h4>
+  <div class="codewrap"><span class="label">PS&gt;</span><button class="copy">Copy</button><pre><code>$kt = 'C:\Program Files\Inductive Automation\Ignition\lib\runtime\jre-win\bin\keytool.exe'
+$d  = 'C:\adfs-setup\ign'; New-Item -ItemType Directory -Force $d | Out-Null
+$pw = -join ((48..57)+(65..90)+(97..122) | Get-Random -Count 24 | % {[char]$_})
+Set-Content "$d\keystore-password.txt" $pw -Encoding ASCII
+icacls "$d\keystore-password.txt" /inheritance:r /grant:r "Administrators:F" "SYSTEM:F" | Out-Null
+
+&amp; $kt -genkeypair -alias ignition -keyalg RSA -keysize 2048 -sigalg SHA256withRSA -validity 730 `
+  -dname "CN=ignition.example.local, O=Example, OU=IT, C=US" `
+  -ext "SAN=dns:ignition.example.local" -ext "EKU=serverAuth" `
+  -keystore "$d\ignition.p12" -storetype PKCS12 -storepass $pw -keypass $pw
+
+&amp; $kt -certreq -alias ignition -keystore "$d\ignition.p12" -storetype PKCS12 -storepass $pw `
+  -ext "SAN=dns:ignition.example.local" -file "$d\ignition.csr"
+
+certutil -dump "$d\ignition.csr" | Select-String 'DNS Name'   # must show the SAN</code></pre></div>
+  <div class="callout warn"><b>Why not Ignition’s own “Create CSR” wizard?</b>
+    It produced a request with an <i>empty</i> Subject Alternative Name. The CA signed it, but Edge/Chrome reject a certificate with no SAN (<code>ERR_CERT_COMMON_NAME_INVALID</code>). Always check the CSR with <code>certutil -dump</code> before submitting.
+  </div>
+
+  <h4>b) Submit it to the CA as the computer account</h4>
+  <p>The template is machine-only, so a request submitted as <i>you</i> fails with “This type of certificate can be issued only to a computer”. A one-shot scheduled task running as <code>SYSTEM</code> submits as the computer account:</p>
+  <div class="codewrap"><span class="label">PS&gt;</span><button class="copy">Copy</button><pre><code>$cmd = 'certreq -submit -f -q -config "DC01.example.local\example-CA" ' +
+       '-attrib "CertificateTemplate:WebServer" C:\adfs-setup\ign\ignition.csr C:\adfs-setup\ign\ignition-signed.cer'
+$a = New-ScheduledTaskAction -Execute cmd.exe -Argument "/c $cmd"
+$p = New-ScheduledTaskPrincipal -UserId SYSTEM -LogonType ServiceAccount -RunLevel Highest
+Register-ScheduledTask -TaskName TmpCsr -Action $a -Principal $p -Force | Out-Null
+Start-ScheduledTask TmpCsr; Start-Sleep 10
+Unregister-ScheduledTask TmpCsr -Confirm:$false
+certutil -dump C:\adfs-setup\ign\ignition-signed.cer | Select-String 'DNS Name|NotAfter'</code></pre></div>
+
+  <h4>c) Put the signed certificate (and CA) into the keystore</h4>
+  <div class="codewrap"><span class="label">PS&gt;</span><button class="copy">Copy</button><pre><code>$pw = (Get-Content "$d\keystore-password.txt").Trim()
+&amp; $kt -importcert -noprompt -trustcacerts -alias example-ca -file C:\adfs-setup\example-ca.cer -keystore "$d\ignition.p12" -storetype PKCS12 -storepass $pw
+&amp; $kt -importcert -noprompt -trustcacerts -alias ignition     -file "$d\ignition-signed.cer"      -keystore "$d\ignition.p12" -storetype PKCS12 -storepass $pw
+&amp; $kt -list -keystore "$d\ignition.p12" -storetype PKCS12 -storepass $pw   # expect: PrivateKeyEntry + trustedCertEntry</code></pre></div>
+
+  <h4>d) Convert to the three PEM files Ignition’s SSL wizard wants</h4>
+  <p>Ignition 8.3’s “I have all the items” path wants the key as <b>PKCS#8 PEM</b>, plus the server certificate and the CA certificate as PEM. There is no <code>openssl</code> on the server, so .NET’s CNG API does the conversion (Windows PowerShell 5.1):</p>
+  <div class="codewrap"><span class="label">PS&gt;</span><button class="copy">Copy</button><pre><code>Add-Type -AssemblyName System.Security
+$flags = [Security.Cryptography.X509Certificates.X509KeyStorageFlags]::Exportable
+$col = New-Object Security.Cryptography.X509Certificates.X509Certificate2Collection
+$col.Import("$d\ignition.p12", $pw, $flags)
+$cert = $col | Where HasPrivateKey | Select -First 1
+$rsa  = [Security.Cryptography.X509Certificates.RSACertificateExtensions]::GetRSAPrivateKey($cert)
+$blob = $rsa.Key.Export([Security.Cryptography.CngKeyBlobFormat]::Pkcs8PrivateBlob)
+function ToPem($b,$label){ "-----BEGIN $label-----`n" + [Convert]::ToBase64String($b,'InsertLineBreaks') + "`n-----END $label-----`n" }
+$ascii = [Text.Encoding]::ASCII
+[IO.File]::WriteAllText("$d\ignition-key.pem",  (ToPem $blob 'PRIVATE KEY'),       $ascii)
+[IO.File]::WriteAllText("$d\ignition-cert.pem", (ToPem $cert.RawData 'CERTIFICATE'), $ascii)
+$caCert = New-Object Security.Cryptography.X509Certificates.X509Certificate2 'C:\adfs-setup\example-ca.cer'
+[IO.File]::WriteAllText("$d\example-ca.pem",  (ToPem $caCert.RawData 'CERTIFICATE'), $ascii)
+icacls "$d\ignition-key.pem" /inheritance:r /grant:r "Administrators:F" "SYSTEM:F" | Out-Null</code></pre></div>
+  <div class="callout bad"><b>Protect the key</b> <code>ignition-key.pem</code> and <code>ignition.p12</code> are the Gateway’s private key. In this lab the key text was pasted into Ignition via the browser and also appeared in the working notes; treat that key as <b>exposed</b> and regenerate it (repeat 2.4) before using this for anything real. Delete the files from <code>C:\adfs-setup\ign</code> afterwards — Ignition keeps its own copy.</div>
+</section>
+
+<section id="s3">
+  <h2><span class="stepno">3</span>AD FS install</h2>
+  <p class="lead">KDS root key → service account → role → free port 443 → farm → browser User-Agent list.</p>
+
+  <h3>3.1 KDS root key and the gMSA</h3>
+  <p>A group-managed service account needs a KDS root key in the forest. A new key normally becomes usable after 10 hours (so every DC has replicated it). On a <b>single</b> DC lab you can back-date it.</p>
+  <div class="codewrap"><span class="label">PS&gt;</span><button class="copy">Copy</button><pre><code>if (-not (Get-KdsRootKey)) { Add-KdsRootKey -EffectiveTime ((Get-Date).AddHours(-10)) }   # lab only; production: wait 10 h
+Get-KdsRootKey | Select KeyId,EffectiveTime
+
+New-ADServiceAccount -Name adfs-svc -DNSHostName adfs.example.local `
+  -PrincipalsAllowedToRetrieveManagedPassword 'DC01$'
+
+# Windows Server 2025 does not allow RC4 - make the account AES-only (value 24)
+Set-ADServiceAccount adfs-svc -KerberosEncryptionType AES128,AES256
+Get-ADServiceAccount adfs-svc -Properties msDS-SupportedEncryptionTypes | Select Name,'msDS-SupportedEncryptionTypes'</code></pre></div>
+  <div class="callout bad"><b>The encryption-type trap</b>
+    A fresh gMSA has <code>msDS-SupportedEncryptionTypes = 28</code> (RC4 + AES). The server only supports AES (<code>24</code>), so <code>Install-ADServiceAccount</code> fails with <i>“The provided context did not match the target”</i> and the event log (<code>Microsoft-Windows-ManagedServiceAccount/Operational</code>, IDs 9000–9002) says <i>“not all the supported encryption types of the account are supported by the local machine”</i>. Setting the account to AES-only fixes it. (A reboot is also needed after the account is created so the server’s Kerberos ticket reflects its permission — or run <code>klist purge -li 0x3e7</code>.)
+  </div>
+
+  <h3>3.2 Install the role</h3>
+  <div class="codewrap"><span class="label">PS&gt;</span><button class="copy">Copy</button><pre><code>Install-WindowsFeature ADFS-Federation -IncludeManagementTools
+# -> "You must restart this server to finish the installation process."  Restart now.
+Restart-Computer</code></pre></div>
+
+  <h3>3.3 Free port 443 (Windows Admin Center was using it)</h3>
+  <p>AD FS (HTTP.sys) must listen on 443. In this lab Windows Admin Center (WAC) was already bound to 443 through Kestrel. Move WAC to 6443 by editing its settings file in <b>two</b> places and restarting its service:</p>
+  <div class="codewrap"><span class="label">PS&gt;</span><button class="copy">Copy</button><pre><code>$f = 'C:\Program Files\WindowsAdminCenter\Service\appsettings.json'
+Copy-Item $f C:\adfs-setup\appsettings.json.bak -Force
+$t = Get-Content $f -Raw
+$t = $t.Replace('"Url":  "https://*:443"','"Url":  "https://*:6443"').Replace('"https://+:443"','"https://+:6443"')
+Set-Content $f $t -Encoding UTF8
+Restart-Service WindowsAdminCenter
+Get-NetTCPConnection -State Listen | Where LocalPort -in 443,6443 |
+  Select LocalPort,@{n='Proc';e={(Get-Process -Id $_.OwningProcess).Name}}</code></pre></div>
+  <div class="callout warn"><b>After this</b> WAC is at <code>https://&lt;server&gt;:6443</code> and its old firewall rule (443) no longer matches — add a rule for 6443 if you use WAC remotely. Its self-signed certificate had also expired (May 2026); that is cosmetic but worth replacing. If your server has no WAC, skip this step. Use <code>Get-NetTCPConnection -LocalPort 443</code> to find whatever else holds 443.</div>
+
+  <h3>3.4 Install the gMSA locally and create the farm</h3>
+  <div class="codewrap"><span class="label">PS&gt;</span><button class="copy">Copy</button><pre><code>Install-ADServiceAccount adfs-svc
+Test-ADServiceAccount adfs-svc          # must print True
+
+$thumb = 'A1B2C3D4E5F60718293A4B5C6D7E8F9012345678'      # certificate from Step 2.2
+Install-AdfsFarm -CertificateThumbprint $thumb `
+  -FederationServiceName 'adfs.example.local' `
+  -FederationServiceDisplayName 'Example SSO' `
+  -GroupServiceAccountIdentifier 'EXAMPLE\adfs-svc$' `
+  -OverwriteConfiguration -Confirm:$false</code></pre></div>
+  <p>Expected warnings, all harmless in a lab: the KDS key may not have replicated to other DCs (only matters with more than one DC); <i>“A machine restart is required”</i> (restart once more); and the certificate does not contain all UPN suffixes (only for device registration).</p>
+
+  <h3>3.5 Allow Chromium-based browsers to use Windows sign-in</h3>
+  <p>AD FS only offers silent Windows authentication to browsers whose User-Agent is on the <code>WIASupportedUserAgents</code> list. The default list covers IE and legacy Edge. Chromium Edge and Chrome identify as <code>Mozilla/5.0</code>, so add it, then restart the service:</p>
+  <div class="codewrap"><span class="label">PS&gt;</span><button class="copy">Copy</button><pre><code>$ua = (Get-AdfsProperties).WIASupportedUserAgents
+if ($ua -notcontains 'Mozilla/5.0') { Set-AdfsProperties -WIASupportedUserAgents ($ua + 'Mozilla/5.0') }
+Restart-Service adfssrv
+(Get-AdfsProperties).WIASupportedUserAgents -join ' | '</code></pre></div>
+
+  <h3>3.6 Verify AD FS is healthy</h3>
+  <div class="codewrap"><span class="label">PS&gt;</span><button class="copy">Copy</button><pre><code>Get-Service adfssrv                                  # Running
+Get-AdfsProperties | Select HostName,Identifier,HttpsPort
+Get-AdfsSslCertificate                               # adfs / localhost / certauth.adfs -> your thumbprint
+setspn -L adfs-svc                                   # host/adfs.example.local  (the SPN Kerberos needs)
+setspn -X                                            # no duplicate SPNs
+(Invoke-WebRequest https://adfs.example.local/adfs/.well-known/openid-configuration -UseBasicParsing).StatusCode   # 200</code></pre></div>
+  <div class="callout ok"><b>Good result</b> The discovery document returns HTTP 200 with <code>issuer = https://adfs.example.local/adfs</code>, an authorize endpoint <code>…/adfs/oauth2/authorize/</code>, a token endpoint <code>…/adfs/oauth2/token/</code> and keys at <code>…/adfs/discovery/keys</code>.</div>
+</section>
+
+<section id="s4">
+  <h2><span class="stepno">4</span>Register Ignition in AD FS</h2>
+  <p class="lead">An <b>application group</b> with a confidential server application (the OIDC client) and a web API (so claims reach the ID token).</p>
+
+  <div class="callout note"><b>Why a web API too?</b>
+    The claims in the ID token come from the <i>issuance transform rules</i> of the relying party the client asks for. Giving the Web API the <b>same identifier as the client id</b> makes AD FS use its rules for the ID token, so UPN, e-mail, username and groups arrive. Without it the token contains only a few default claims.
+  </div>
+
+  <div class="codewrap"><span class="label">PS&gt;</span><button class="copy">Copy</button><pre><code>$grp      = 'Ignition SCADA'
+$clientId = 'ignition-perspective'
+$redirect = 'https://ignition.example.local:8043/data/federate/callback/oidc'   # exactly Ignition's value
+
+New-AdfsApplicationGroup -Name $grp -ApplicationGroupIdentifier $clientId           # NOTE: New-, not Add-
+
+$app = Add-AdfsServerApplication -Name 'Ignition Gateway - Server app' `
+         -ApplicationGroupIdentifier $clientId -Identifier $clientId `
+         -RedirectUri $redirect -GenerateClientSecret
+# The secret is shown only once - store it with a locked-down ACL:
+Set-Content C:\adfs-setup\ignition-client-secret.txt $app.ClientSecret -Encoding ASCII
+icacls C:\adfs-setup\ignition-client-secret.txt /inheritance:r /grant:r "Administrators:F" "SYSTEM:F" | Out-Null
+
+Add-AdfsWebApiApplication -Name 'Ignition Gateway - Web API' `
+  -ApplicationGroupIdentifier $clientId -Identifier $clientId -AccessControlPolicyName 'Permit everyone'
+
+$rules = @'
+@RuleName = "AD attributes"
+c:[Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/windowsaccountname", Issuer == "AD AUTHORITY"]
+ => issue(store = "Active Directory", types = ("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"), query = ";userPrincipalName,mail,sAMAccountName;{0}", param = c.Value);
+
+@RuleName = "AD groups as roles"
+c:[Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/windowsaccountname", Issuer == "AD AUTHORITY"]
+ => issue(store = "Active Directory", types = ("http://schemas.microsoft.com/ws/2008/06/identity/claims/role"), query = ";tokenGroups;{0}", param = c.Value);
+'@
+Set-AdfsWebApiApplication -TargetName 'Ignition Gateway - Web API' -IssuanceTransformRules $rules
+
+Grant-AdfsApplicationPermission -ClientRoleIdentifier $clientId -ServerRoleIdentifier $clientId `
+  -ScopeNames 'openid','profile','email','allatclaims'</code></pre></div>
+
+  <h3>What the claims become</h3>
+  <div class="tablewrap"><table>
+    <tr><th>AD source</th><th>Claim in the ID token</th><th>Ignition user attribute (Step 8)</th></tr>
+    <tr><td>stable object id (AD FS)</td><td><code>sub</code></td><td><b>ID</b></td></tr>
+    <tr><td>sAMAccountName</td><td><code>unique_name</code> (e.g. <code>ssotest</code>)</td><td><b>Username</b></td></tr>
+    <tr><td>userPrincipalName</td><td><code>upn</code></td><td>(available)</td></tr>
+    <tr><td>mail</td><td><code>email</code></td><td><b>Email</b> (empty if the AD user has no mail)</td></tr>
+    <tr><td>group membership (tokenGroups)</td><td><code>role</code> — one value per group</td><td><b>Roles</b></td></tr>
+  </table></div>
+
+  <h3>Changing it later</h3>
+  <div class="codewrap"><span class="label">PS&gt;</span><button class="copy">Copy</button><pre><code># e.g. Ignition moved to another host/port:
+Set-AdfsServerApplication -TargetName 'Ignition Gateway - Server app' -RedirectUri 'https://newhost:8043/data/federate/callback/oidc'
+Get-AdfsServerApplication | Select Name,Identifier,RedirectUri
+# a second application (another OIDC app) = another New-AdfsApplicationGroup + Add-AdfsServerApplication with its own client id/secret</code></pre></div>
+  <div class="callout tip"><b>Test without Ignition</b> Open <code>https://adfs.example.local/adfs/ls/idpinitiatedsignon.aspx</code> on a domain PC: it should show you signed in. (It is disabled by default; enable with <code>Set-AdfsProperties -EnableIdPInitiatedSignonPage $true</code> if you want it.)</div>
+</section>
+
+<section id="s5">
+  <h2><span class="stepno">5</span>Group Policy for the browsers</h2>
+  <p class="lead">This is what turns “password form” into “silent”. Without it, Edge/Chrome do not send the user’s Windows credentials to AD FS.</p>
+
+  <p>Two things are required on each client, and one GPO provides both:</p>
+  <ul>
+    <li><b>Intranet zone</b> — Windows/Edge only auto-sign-in to sites in the Local Intranet zone. A name with a dot (<code>adfs.example.local</code>) is <i>not</i> an intranet site by default, so map it explicitly (zone value <code>1</code>).</li>
+    <li><b>Allow-list for Negotiate</b> — Edge and Chrome need <code>AuthServerAllowlist</code> to attempt Kerberos/NTLM against a fully-qualified host.</li>
+  </ul>
+  <div class="codewrap"><span class="label">PS&gt;</span><button class="copy">Copy</button><pre><code>Import-Module GroupPolicy
+$name = 'SSO - AD FS Intranet Zone'
+$gpo  = Get-GPO -Name $name -ErrorAction SilentlyContinue
+if (-not $gpo) { $gpo = New-GPO -Name $name -Comment 'Treat AD FS as intranet so browsers send Windows credentials (Kerberos) for SSO' }
+$site = 'adfs.example.local'
+
+$zk = 'HKLM\Software\Policies\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMapKey'
+Set-GPRegistryValue -Name $name -Key $zk -ValueName "https://$site" -Type String -Value '1'
+Set-GPRegistryValue -Name $name -Key $zk -ValueName "http://$site"  -Type String -Value '1'
+foreach ($k in 'HKLM\Software\Policies\Microsoft\Edge','HKLM\Software\Policies\Google\Chrome') {
+  Set-GPRegistryValue -Name $name -Key $k -ValueName 'AuthServerAllowlist' -Type String -Value $site
+}
+
+$dom = (Get-ADDomain).DistinguishedName
+if (-not ((Get-GPInheritance -Target $dom).GpoLinks | Where DisplayName -eq $name)) {
+  New-GPLink -Name $name -Target $dom -LinkEnabled Yes
+}
+gpupdate /force</code></pre></div>
+  <div class="callout bad"><b>Script bug we hit</b> Writing the link test as <code>if (-not (…).GpoLinks | Where …)</code> negates the wrong thing and silently <i>skips</i> creating the link. Wrap the whole pipeline in its own parentheses as above, and always confirm with <code>(Get-GPInheritance -Target $dom).GpoLinks</code>.</div>
+  <div class="callout tip"><b>Verify on a client</b> <code>gpupdate /force</code>, then in Edge open <code>edge://policy</code> — <code>AuthServerAllowlist</code> must be listed. In <code>inetcpl.cpl → Security → Local intranet → Sites → Advanced</code> the AD FS URL is shown as managed by policy. Firefox ignores these policies (it has its own <code>network.negotiate-auth.trusted-uris</code>).</div>
+</section>
+
+<section id="s6">
+  <h2><span class="stepno">6</span>Firewall</h2>
+  <p class="lead">Only Ignition’s HTTPS port needed a new rule; AD FS creates its own.</p>
+  <div class="codewrap"><span class="label">PS&gt;</span><button class="copy">Copy</button><pre><code># AD FS already added: "AD FS HTTPS Services (TCP-In)" 443, "AD FS HTTP Services" 80, "AD FS Smart-card ..." 443
+New-NetFirewallRule -DisplayName 'Ignition Gateway HTTPS (TCP 8043)' `
+  -Description 'Inbound HTTPS to the Ignition Gateway (Perspective / web UI)' `
+  -Direction Inbound -Action Allow -Protocol TCP -LocalPort 8043 -Profile Domain,Private
+
+# If you still use Windows Admin Center remotely after moving it:
+# New-NetFirewallRule -DisplayName 'WAC (TCP 6443)' -Direction Inbound -Action Allow -Protocol TCP -LocalPort 6443 -Profile Domain
+
+Get-NetFirewallRule -Direction Inbound -Enabled True -Action Allow | Get-NetFirewallPortFilter |
+  Where LocalPort -in 443,8043,6443 | Select LocalPort,Protocol</code></pre></div>
+  <p>HTTP (8088) was deliberately left closed so users can only reach Ignition over TLS. Test from a client with <code>Test-NetConnection ignition.example.local -Port 8043</code>.</p>
+</section>
+
+<section id="s7">
+  <h2><span class="stepno">7</span>Ignition install + HTTPS</h2>
+  <p class="lead">Install, commission, enable HTTPS with the certificate from Step 2.4, and make Ignition’s Java trust your CA.</p>
+
+  <h3>7.1 Install</h3>
+  <ol class="steps">
+    <li>Download <b>Ignition 8.3 Windows 64-bit</b> (<code>ignition-8.3.9-windows-64-installer.exe</code>, ~2 GB) from inductiveautomation.com → <i>Download Ignition</i>. The page asks for registration details, so do this in a browser yourself.</li>
+    <li>Check the signature: <code>Get-AuthenticodeSignature .\ignition-8.3.9-windows-64-installer.exe</code> → signer <i>Inductive Automation, LLC</i>, status <i>Valid</i>.</li>
+    <li>Run the installer <b>interactively</b>: Typical install, accept the licence, keep the defaults (service name <code>Ignition</code>, HTTP 8088, HTTPS 8043, Gateway Network 8060).</li>
+  </ol>
+  <div class="callout warn"><b>Silent install did nothing</b> <code>--mode unattended --unattendedmodeui none</code> returned exit code 0 after ~20 s but installed nothing (no service, no folder). Use the GUI installer.</div>
+
+  <h3>7.2 Commission the Gateway</h3>
+  <p>Open <code>http://localhost:8088/</code> on the server. Until commissioning finishes, <code>/StatusPing</code> returns <code>{"state":"RUNNING","details":"COMMISSIONING"}</code> and HTTPS (8043) is <b>not</b> listening. In the wizard accept the licence and <b>create the Gateway admin user</b> (choose a strong password yourself — it is the Designer/config login, <i>not</i> the SSO user). Answer the Quick Start prompt with “No thanks” for a clean system. The Gateway then starts (<code>StatusPing</code> → <code>RUNNING</code>).</p>
+  <div class="codewrap"><span class="label">PS&gt;</span><button class="copy">Copy</button><pre><code>Get-Service Ignition
+(Invoke-WebRequest http://localhost:8088/StatusPing -UseBasicParsing).Content
+Get-NetTCPConnection -State Listen | Where LocalPort -in 8088,8060,8043     # 8043 only after SSL is set up</code></pre></div>
+
+  <h3>7.3 Turn on HTTPS with your certificate</h3>
+  <p>Log in at <code>http://localhost:8088/app/…</code> → <b>Network → Web Server</b> (left menu) → <b>Setup SSL / TLS</b>. Choose <b>“Yes — I have all the items above”</b>, then:</p>
+  <ol class="steps">
+    <li><b>Private key</b> — click <i>Manually Enter Data</i> (or upload) and provide <code>ignition-key.pem</code> (PKCS#8, no password). <b>Next</b>.</li>
+    <li><b>Server certificate</b> — provide <code>ignition-cert.pem</code>. Ignition shows subject <code>ignition.example.local</code>, issuer <code>example-CA</code> and the dates. <b>Next</b>.</li>
+    <li><b>CA certificate</b> — provide <code>example-ca.pem</code> (root). <b>Add SSL / TLS</b>.</li>
+    <li>Ignition restarts its web server and redirects the browser to <code>https://localhost:8043/…?ca_signed_success=true</code>. HTTPS port stays 8043.</li>
+  </ol>
+  <div class="callout warn"><b>Wizard traps</b>
+    <ul style="margin:6px 0 0 1.2em">
+      <li>If you first tried the “No → create CSR” path, the wizard remembers that key and shows <code>Generated with previous CSR</code> at the key step. The later certificate then fails with <i>“Unable to find a private key which matches the public key from the server certificate”</i>. Click <b>Reset Step</b> → Confirm, then supply the right key.</li>
+      <li>When text is pasted programmatically the <b>Next</b> button can stay disabled until a real key press happens in the box (e.g. type a space and delete it).</li>
+      <li>8043 will not listen until this wizard completes — a missing 8043 is not a firewall problem.</li>
+    </ul>
+  </div>
+
+  <h3>7.4 Make Ignition’s Java trust your CA</h3>
+  <p>The Gateway is a TLS <i>client</i> when it fetches AD FS’s discovery document and calls the token endpoint. Java does not use the Windows trust store, so import the CA into the JRE that ships with Ignition and restart:</p>
+  <div class="codewrap"><span class="label">PS&gt;</span><button class="copy">Copy</button><pre><code>$kt = 'C:\Program Files\Inductive Automation\Ignition\lib\runtime\jre-win\bin\keytool.exe'
+$cacerts = 'C:\Program Files\Inductive Automation\Ignition\lib\runtime\jre-win\lib\security\cacerts'
+Copy-Item $cacerts C:\adfs-setup\cacerts.bak -Force
+&amp; $kt -importcert -noprompt -trustcacerts -alias example-ca -file C:\adfs-setup\example-ca.cer -keystore $cacerts -storepass changeit
+Restart-Service Ignition</code></pre></div>
+  <div class="callout note"><b>Upgrades</b> An Ignition upgrade can replace its bundled JRE and drop this import — redo it after upgrades. The keytool “use -cacerts option” warning is harmless.</div>
+
+  <h3>7.5 Verify HTTPS</h3>
+  <div class="codewrap"><span class="label">PS&gt;</span><button class="copy">Copy</button><pre><code>$tcp = New-Object Net.Sockets.TcpClient('ignition.example.local',8043)
+$ssl = New-Object Net.Security.SslStream($tcp.GetStream(),$false)
+$ssl.AuthenticateAsClient('ignition.example.local')
+"TLS: $($ssl.SslProtocol)"
+$c = New-Object Security.Cryptography.X509Certificates.X509Certificate2($ssl.RemoteCertificate)
+$c.Subject; $c.Issuer; $c.NotAfter
+$chain = New-Object Security.Cryptography.X509Certificates.X509Chain; $chain.ChainPolicy.RevocationMode='NoCheck'
+"Chain valid: $($chain.Build($c))"</code></pre></div>
+  <p>Expected: TLS 1.3, subject <code>CN=ignition.example.local</code>, issuer <code>CN=example-CA</code>, chain valid <code>True</code>.</p>
+</section>
+
+<section id="s8">
+  <h2><span class="stepno">8</span>Ignition identity provider</h2>
+  <p class="lead">Make Ignition trust AD FS and turn its claims into Ignition users.</p>
+
+  <h3>8.1 Create the OpenID Connect provider</h3>
+  <p>Gateway web page → <b>Platform → Security → Identity Providers → Create Identity Provider</b>.</p>
+  <ol class="steps">
+    <li>Type: <b>OpenID Connect 1.0</b> → Next. Name: <code>ADFS</code>.</li>
+    <li>Under <i>Import Provider Metadata</i> choose <b>From URL</b> and enter <code>https://adfs.example.local/adfs/.well-known/openid-configuration</code> → <b>Import</b>. You must see <b>IMPORT COMPLETE</b>; it fills the authorization, token, logout, keys and user-info URLs and the issuer.</li>
+    <li><b>Client ID</b>: <code>ignition-perspective</code>. <b>Client Secret → Embedded</b> → paste the secret from <code>C:\adfs-setup\ignition-client-secret.txt</code>.</li>
+    <li><b>Scope</b>: add four values — <code>openid</code>, <code>profile</code>, <code>email</code>, <code>allatclaims</code> (click <i>Add Value</i>, type, then click the green save icon on that row; Enter alone does not commit it). The authorize URL will show <code>openid</code> repeated because Ignition always adds it — harmless.</li>
+    <li>Leave the rest as imported (response mode <code>form_post</code>, signing algorithm RS256, “Use JSON Web Key URL” on). <b>Create Identity Provider</b>.</li>
+  </ol>
+  <div class="callout tip"><b>Check Ignition’s redirect URI</b> At the top of the form Ignition prints <i>“The redirect URI for this Ignition Gateway is …/data/federate/callback/oidc”</i>. It must equal the URI registered in AD FS (Step 4) <b>exactly</b>, including <code>https</code>, host and port. If you change the Gateway’s public address or port, update AD FS too.</div>
+
+  <h3>8.2 Map claims to users</h3>
+  <p>Identity Providers list → the <b>⋮ menu on <code>ADFS</code> → User Attribute Mapping</b>. All use Type <b>direct</b>, Source <b>ID Token Claims</b>:</p>
+  <div class="tablewrap"><table>
+    <tr><th>Ignition attribute</th><th>Path (claim)</th><th>Why</th></tr>
+    <tr><td>ID</td><td><code>sub</code></td><td>Stable unique id. Keep the default.</td></tr>
+    <tr><td>Username</td><td><code>unique_name</code></td><td>The default was <code>sub</code> — an unreadable string. <code>unique_name</code> = sAMAccountName (<code>ssotest</code>).</td></tr>
+    <tr><td>Email</td><td><code>email</code></td><td>From the AD <code>mail</code> attribute.</td></tr>
+    <tr><td>Roles</td><td><code>role</code></td><td>One entry per AD group.</td></tr>
+  </table></div>
+  <p>The Designer cannot enumerate roles from an external IdP (see Step 10 notes), so groups are used through these claims, not through an Ignition user source.</p>
+
+  <h3>8.3 Test the provider before building anything on it</h3>
+  <p>⋮ menu → <b>Test Login</b>. Ignition redirects to AD FS and, on success, shows <b>ADFS Test Results</b> with three tabs: <i>Idp Response Data</i> (the raw claims), <i>Mapped User Attributes</i> and <i>Security Level Grants</i>.</p>
+  <div class="callout ok"><b>Expect</b> in the ID token: <code>aud: ignition-perspective</code>, <code>iss: https://adfs.example.local/adfs</code>, <code>upn</code>, <code>unique_name</code>, <code>email</code>, <code>role</code>. Mapped attributes: <code>userName = ssotest</code>, <code>email = ssotest@example.local</code>.</div>
+  <div class="callout note"><b>Test Login runs in your current browser.</b> A normal domain Edge signs in silently. The embedded browser panes used by some tools cannot negotiate Windows authentication; they stop on a blank AD FS page (<code>…/oauth2/authorize/wia</code>) or show the password form.</div>
+</section>
+
+<section id="s9">
+  <h2><span class="stepno">9</span>Project, login rule, and the page</h2>
+  <p class="lead">A Perspective project that requires login through <code>ADFS</code> and shows who signed in.</p>
+
+  <h3>9.1 Create the project and choose the IdP</h3>
+  <ol class="steps">
+    <li>Gateway page → <b>Platform → System → Projects → Create Project</b>. Name <code>SSOTest</code> → Create. (The project appears under <code>data\projects\SSOTest</code>.)</li>
+    <li>Row ⋮ → <b>Edit</b> → <i>Security Settings → Identity Provider</i> = <code>ADFS</code> → Save. (Also settable in the Designer, below.)</li>
+  </ol>
+
+  <h3>9.2 Require login (Designer — see Step 10 first)</h3>
+  <p>In the Designer: <b>Project → Project Properties</b>.</p>
+  <ul>
+    <li><b>Project → General → Security Settings:</b> Identity Provider <code>ADFS</code>; tick <i>Automatically redirect users to the IdP if authentication is required</i>; User Source <code>default</code> (the Designer insists on one — it is only used for Designer/Vision, not for the SSO login).</li>
+    <li><b>Perspective → Permissions:</b> in <i>Security Levels</i> <b>untick “Public”</b> and <b>tick “Authenticated”</b>. This is what makes the page ask for a login. Save the project (<kbd>Ctrl</kbd>+<kbd>S</kbd>).</li>
+  </ul>
+  <div class="callout note"><b>Harmless error</b> After <i>OK</i> the Designer may pop up <i>“Can’t get roles from the gateway.”</i> It tries to read roles from the IdP’s user source, which an external IdP cannot supply. The settings are still written (<code>com.inductiveautomation.perspective\session-permissions</code> and <code>ignition\global-props</code> change on disk).</div>
+
+  <h3>9.3 The view</h3>
+  <p>Perspective → <b>Views → Main</b> (a coordinate container). It contains seven labels bound with expressions to the session’s auth properties:</p>
+  <div class="tablewrap"><table>
+    <tr><th>Label</th><th>Expression / content</th></tr>
+    <tr><td>Heading</td><td>static text “SIGNED IN WITH WINDOWS SSO (AD FS)”</td></tr>
+    <tr><td>Welcome</td><td><code>"Welcome, " + {session.props.auth.user.userName}</code></td></tr>
+    <tr><td>UsernameRow</td><td><code>"Username:  " + {session.props.auth.user.userName}</code></td></tr>
+    <tr><td>EmailRow</td><td><code>"Email:  " + {session.props.auth.user.email}</code></td></tr>
+    <tr><td>RolesRow</td><td>binding <code>{session.props.auth.user.roles}</code> + a <b>script transform</b> that joins the group names (see <a href="#appx-view">Appendix B</a>)</td></tr>
+    <tr><td>IdpRow</td><td><code>"Identity provider:  " + {session.props.auth.idp}</code></td></tr>
+    <tr><td>AuthRow</td><td><code>"Authenticated:  " + toStr({session.props.auth.authenticated})</code></td></tr>
+  </table></div>
+  <div class="callout bad"><b>Container mode matters</b> The root container must be in <b>fixed</b> pixel mode. In <code>percent</code> mode (the default in a hand-written file) x=30, width=640 are read as <i>percent</i>, so everything is drawn far outside the screen: the page text exists in the DOM but the canvas looks blank — in the Designer and in the browser.</div>
+  <p><b>Page configuration:</b> map <code>/</code> to <code>Main</code> (Perspective → Page Configuration). The final URL is:</p>
+  <div class="codewrap"><span class="label">URL</span><button class="copy">Copy</button><pre><code>https://ignition.example.local:8043/data/perspective/client/SSOTest</code></pre></div>
+  <p>On first visit, Perspective shows <i>“You must log in to continue — Continue to log in”</i>. One click sends the browser to AD FS; with a domain browser it returns signed in with no prompt. (That one landing click is Perspective’s own behaviour for a non-interactive redirect.)</p>
+  <div class="callout tip"><b>Editing without the Designer</b> The project is plain files under <code>C:\Program Files\Inductive Automation\Ignition\data\projects\SSOTest</code>. A hand-edited <code>view.json</code> is picked up after <i>Platform → Projects → Scan File System</i> or a service restart. Rules learned: every <code>resource.json</code> needs a <code>"files": [ … ]</code> array; script bodies in <code>view.json</code> need a leading TAB on every line; close the Designer first or it may overwrite your change.</div>
+</section>
+
+<section id="s10">
+  <h2><span class="stepno">10</span>Designer (and the “Perspective is missing” fix)</h2>
+  <p class="lead">Install the Designer Launcher and tell it not to break Chromium on an administrator account.</p>
+
+  <ol class="steps">
+    <li>On the Gateway home page (or inductiveautomation.com) get <code>designerlauncher.exe</code> (~59 MB, signed by Inductive Automation). Run it <b>interactively</b> (the <code>-q</code> quiet switch just waited for the GUI). Shortcuts appear on the Public Desktop and Start menu.</li>
+    <li>Launcher → <b>Add Designer → Manual</b> → <code>https://ignition.example.local:8043</code> → <b>Add Designer</b>. A certificate dialog (“Import Untrusted Certificate”) shows <code>ignition.example.local</code>, issuer <code>example-CA</code>, valid — click <b>Trust Certificate</b>.</li>
+    <li>Tile ⋮ → <b>Manage</b> → <b>JVM Arguments</b> → <code>-Dignition.chromium.switch.do-not-de-elevate</code> → OK. (Per gateway entry; default settings do not apply.)</li>
+    <li>Select the tile → <b>Open Designer</b> → sign in with the <b>Gateway admin</b> → open <code>SSOTest</code>.</li>
+  </ol>
+
+  <div class="callout bad"><b>The problem this solves</b>
+    Perspective’s Designer workspace uses an embedded Chromium (JxBrowser). Chromium 138+ <i>de-elevates</i> itself and restarts when started by an administrator; JxBrowser does not support that restart, so Chromium exits with code 0. Symptoms: the Project Browser shows Vision but <b>no Perspective node</b>; <i>Tools → Console</i> shows
+    <code>ERROR designer.JxBrowserUtil -- Failed to start Browser Engine</code> … <code>ChromiumProcessStartupFailureException: Process exit code: 0</code> and <code>Web Browser Component can not start!</code>. Nothing is logged by Defender or the Windows event log, and clearing <code>~\.ignition\cache\resources\jxbrowser</code> does not help. With the JVM flag the console shows <code>Starting up Perspective module</code> with no error and the Perspective node appears (Gateway Events, Session Events, Styles, Views).
+  </div>
+  <p>The trial timer (2 hours, resettable by restarting the Gateway or via the Activate Ignition dialog) applies to the Designer as well.</p>
+</section>
+
+<section id="s11">
+  <h2><span class="stepno">11</span>Client PC &amp; the real test</h2>
+  <p class="lead">The server’s own browser is a useful smoke test, but the proof is a separate domain-joined PC.</p>
+  <ol class="steps">
+    <li>Join the PC to <code>example.local</code>; its DNS server must be the DC (<code>10.0.0.10</code>). Check: <code>nslookup adfs.example.local</code> and <code>ignition.example.local</code>.</li>
+    <li>Sign in to Windows as a <b>domain</b> user (<code>ssotest</code>). Run <code>gpupdate /force</code> and sign out/in once so the user and computer policy are applied.</li>
+    <li>Make sure the CA is trusted. Domain-joined machines get an Enterprise CA’s root automatically; verify with <code>certutil -verify -urlfetch</code> or just open <code>https://adfs.example.local</code> — no certificate warning.</li>
+    <li>Open <b>Edge</b> → <code>https://ignition.example.local:8043/data/perspective/client/SSOTest</code> → click <b>Continue to log in</b>.</li>
+    <li>You should land on <b>Welcome, ssotest</b> with <b>no username/password prompt</b>.</li>
+  </ol>
+  <div class="callout ok"><b>Observed result in this lab</b> Edge on the DC (signed in as <code>EXAMPLE\Administrator</code>) opened the page and showed <b>Welcome, Administrator</b>, <i>Roles: Domain Admins, Domain Users, Schema Admins, Enterprise Admins, Group Policy Creator Owners</i>, <i>Identity provider: ADFS</i>, <i>Authenticated: true</i> — with no prompt. A <i>separate</i> domain-joined PC was <b>not</b> tested during the build; do that test.</div>
+  <div class="callout tip"><b>Seeing the Kerberos ticket</b> After a successful sign-in run <code>klist</code> on the client: there should be a service ticket for <code>host/adfs.example.local</code> (client = the user, server = <code>adfs-svc$</code>). If there is none, it fell back to NTLM or a form.</div>
+</section>
+
+<section id="verify">
+  <h2>Verification checklist</h2>
+  <p class="lead">Run top-to-bottom after a rebuild, or when something “used to work”.</p>
+  <ul class="check">
+    <li><b>DNS</b> — <code>Resolve-DnsName adfs.example.local</code> and <code>ignition.example.local</code> return the DC IP from the server and from a client.</li>
+    <li><b>CA</b> — <code>certutil -CATemplates</code> lists WebServer; <code>certutil -ping</code> works.</li>
+    <li><b>AD FS cert</b> — <code>Get-AdfsSslCertificate</code> shows the right thumbprint for <code>adfs…</code>, <code>localhost</code>, <code>certauth.adfs…</code>; subject <b>and</b> SAN = the service name.</li>
+    <li><b>gMSA</b> — <code>Test-ADServiceAccount adfs-svc</code> is <code>True</code>; <code>setspn -L adfs-svc</code> shows <code>host/adfs.example.local</code>; <code>setspn -X</code> shows no duplicate.</li>
+    <li><b>AD FS service</b> — <code>Get-Service adfssrv</code> Running; discovery URL returns 200.</li>
+    <li><b>WIA</b> — <code>(Get-AdfsProperties).WIASupportedUserAgents</code> contains <code>Mozilla/5.0</code>.</li>
+    <li><b>OIDC client</b> — <code>Get-AdfsServerApplication</code> redirect URI equals Ignition’s; <code>Get-AdfsApplicationPermission</code> lists <code>openid profile email allatclaims</code>.</li>
+    <li><b>GPO</b> — linked, enabled; client <code>edge://policy</code> shows <code>AuthServerAllowlist</code>.</li>
+    <li><b>Firewall</b> — client <code>Test-NetConnection ignition.example.local -Port 8043</code> → <code>TcpTestSucceeded True</code>.</li>
+    <li><b>Ignition HTTPS</b> — valid chain, TLS 1.3 (Step 7.5); CA imported in <code>cacerts</code>.</li>
+    <li><b>IdP</b> — Test Login shows the claims and <code>userName = unique_name</code>.</li>
+    <li><b>Project</b> — Identity Provider <code>ADFS</code>; Perspective permissions = Authenticated only.</li>
+    <li><b>End-to-end</b> — Edge on a domain PC → “Welcome, &lt;user&gt;” with no prompt.</li>
+  </ul>
+</section>
+
+<section id="trouble">
+  <h2>Troubleshooting</h2>
+  <p class="lead">Every entry below happened during this build, plus the likely causes of the “still asks for a password” case. Search or expand.</p>
+  <input id="search" type="search" placeholder="Filter: e.g. 443, SAN, gMSA, blank, Chromium, 401 …" aria-label="Filter troubleshooting entries">
+
+  <div class="callout note"><b>Where to look first</b>
+    <dl class="dl">
+      <dt>AD FS</dt><dd>Event Viewer → <i>Applications and Services Logs → AD FS → Admin</i> (and <i>AD FS Tracing</i> if enabled). <code>Get-WinEvent -LogName 'AD FS/Admin' -MaxEvents 20</code></dd>
+      <dt>Kerberos</dt><dd>Security log 4624/4625 (logon) and 4768/4769 (tickets) on the DC; on the client <code>klist</code>, <code>klist purge</code>.</dd>
+      <dt>Ignition</dt><dd><code>C:\Program Files\Inductive Automation\Ignition\logs\wrapper.log</code> (also <i>Status → Diagnostics → Logs</i>). Designer: <i>Tools → Console</i>. Launcher: <code>%USERPROFILE%\.ignition\clientlauncher-data\designerlauncher.log</code>.</dd>
+      <dt>Browser</dt><dd>DevTools (F12) → Network + Console; Perspective logs <i>“store.Auth: Redirecting to login URL …”</i>.</dd>
+    </dl>
+  </div>
+
+  <h3>A · Build &amp; platform</h3>
+
+  <details data-k="elevated access denied dns ca shell">
+    <summary>Commands fail with “Access is denied” though I am Administrator <span class="tag">shell</span></summary>
+    <div class="body"><p><b>Cause:</b> an un-elevated token (UAC filters the built-in Administrator; <code>IsInRole(Administrator)</code> returns False). DNS, CA, AD FS and feature installs all need elevation.</p>
+    <p><b>Fix:</b> start PowerShell / the tool “as administrator”. Check with <code>([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)</code>. Side effect: <code>Get-KdsRootKey</code> returns nothing when not elevated, which looks like “key missing”.</p></div>
+  </details>
+
+  <details data-k="dns resolve could not be resolved adfs name">
+    <summary>Server can’t resolve <code>adfs.example.local</code> although the DNS record exists <span class="tag">DNS</span></summary>
+    <div class="body"><p><b>Cause:</b> the DC’s DNS client pointed at another resolver (the Hyper-V host <code>10.0.0.1</code>). The DNS <i>server</i> answered correctly (<code>Resolve-DnsName … -Server 127.0.0.1</code> worked).</p>
+    <p><b>Fix:</b> <code>Set-DnsClientServerAddress -InterfaceAlias 'Ethernet 2' -ServerAddresses '10.0.0.10','10.0.0.1'</code> then <code>Clear-DnsClientCache</code>.</p></div>
+  </details>
+
+  <details data-k="443 port in use windows admin center wac http.sys kestrel">
+    <summary>Port 443 already in use before installing AD FS <span class="tag">AD FS</span></summary>
+    <div class="body"><p><b>Cause:</b> Windows Admin Center (Kestrel) was bound to <code>*:443</code>. Find the owner: <code>Get-NetTCPConnection -LocalPort 443 -State Listen | % { (Get-Process -Id $_.OwningProcess).Name }</code>.</p>
+    <p><b>Fix:</b> move WAC to 6443 in <code>appsettings.json</code> (<code>Kestrel.Endpoints.WindowsAdminCenter.Url</code> <b>and</b> <code>HttpSysUrls</code>) and restart <code>WindowsAdminCenter</code>. Not recommended: running AD FS on a non-443 port (every URL, redirect and discovery value then needs the port).</p></div>
+  </details>
+
+  <details data-k="gmsa install-adserviceaccount context did not match encryption rc4 9001 9002 test-adserviceaccount">
+    <summary><code>Install-ADServiceAccount</code>: “The provided context did not match the target” <span class="tag">gMSA</span></summary>
+    <div class="body"><p><b>Cause 1 (the real one here):</b> encryption types. Event 9001: <i>not all the supported encryption types of the account are supported by the local machine</i>. Server 2025 has RC4 off; the gMSA defaulted to 28.</p>
+    <p><b>Fix 1:</b> <code>Set-ADServiceAccount adfs-svc -KerberosEncryptionType AES128,AES256</code> (value 24), <code>klist purge -li 0x3e7</code>, retry. Event 9000 <i>“Netlogon failed to retrieve the password … Object Name not found”</i> usually follows from the same cause.</p>
+    <p><b>Cause 2:</b> the computer is not in <code>PrincipalsAllowedToRetrieveManagedPassword</code>, or its Kerberos ticket pre-dates that change → reboot once. <b>Cause 3:</b> KDS root key missing/not yet effective (<code>Get-KdsRootKey</code>).</p></div>
+  </details>
+
+  <details data-k="certsrv_e_template_denied enroll permission template webserver machine computer">
+    <summary><code>CERTSRV_E_TEMPLATE_DENIED</code> / “can be issued only to a computer” <span class="tag">certificates</span></summary>
+    <div class="body"><p><b>Cause:</b> WebServer is a machine template. <code>Get-Certificate</code> into <code>LocalMachine\My</code> enrolls as the <i>computer account</i>, which lacked Enroll. Requesting into <code>CurrentUser\My</code> as an admin fails with “can be issued only to a computer”.</p>
+    <p><b>Fix:</b> give <i>Domain Controllers</i> Enroll on the template (Step 2.1) and request into the machine store; for an externally generated CSR, submit it as <code>SYSTEM</code> via a one-shot scheduled task (Step 2.4b).</p></div>
+  </details>
+
+  <details data-k="san subject alternative name no alternative name err_cert_common_name_invalid csr">
+    <summary>Certificate has “No alternative name” — browser says the name does not match <span class="tag">certificates</span></summary>
+    <div class="body"><p><b>Cause:</b> Ignition’s built-in CSR form has no SAN field, so the CA issues a certificate with an empty SAN. Browsers and Java need the host name in the SAN.</p>
+    <p><b>Fix:</b> create the CSR with <code>keytool … -ext SAN=dns:host</code> (Step 2.4a), check <code>certutil -dump file.csr</code> shows <i>DNS Name=…</i>, and verify the issued cert the same way. Do <b>not</b> enable the CA’s <code>EDITF_ATTRIBUTESUBJECTALTNAME2</code> flag.</p></div>
+  </details>
+
+  <details data-k="powershell replace case insensitive resource.json files view.jsons resource bytes are null">
+    <summary>Gateway logs “Resource bytes are null”; hand-made views never load <span class="tag">Ignition files</span></summary>
+    <div class="body"><p><b>Cause:</b> a template containing the word <code>files</code> was filled with <code>-replace 'FILE','view.json'</code>. PowerShell’s <code>-replace</code> is <b>case-insensitive</b>, so it also rewrote the JSON key <code>"files"</code> to <code>"view.jsons"</code>.</p>
+    <p><b>Fix:</b> the correct <code>resource.json</code> is <code>{"scope":"G","version":1,"restricted":false,"overridable":true,"files":["view.json"],"attributes":{}}</code>. Use <code>.Replace()</code> (case-sensitive) or <code>-creplace</code>. Then <i>Scan File System</i> or restart.</p></div>
+  </details>
+
+  <details data-k="installer silent unattended exit code 0 nothing installed designerlauncher -q">
+    <summary>Silent installers return 0 but nothing is installed <span class="tag">install</span></summary>
+    <div class="body"><p>Ignition <code>--mode unattended</code> and Designer Launcher <code>-q</code> did not complete in this environment (the quiet run waited for a window). Run both installers interactively.</p></div>
+  </details>
+
+  <details data-k="certutil -ca.cert expected no more than 1 args">
+    <summary><code>certutil -ca.cert</code>: “Expected no more than 1 args” <span class="tag">PowerShell</span></summary>
+    <div class="body"><p>PowerShell splits at the dot. Quote it (<code>certutil '-ca.cert' out.cer</code>) or use <code>Export-Certificate</code>.</p></div>
+  </details>
+
+  <h3>B · Ignition</h3>
+
+  <details data-k="8043 not listening https port ssl not enabled commissioning">
+    <summary>Nothing listens on 8043 after install <span class="tag">HTTPS</span></summary>
+    <div class="body"><p><b>Cause:</b> HTTPS only starts after commissioning <i>and</i> after an SSL certificate is installed (Network → Web Server → Setup SSL / TLS). <code>StatusPing</code> says <code>COMMISSIONING</code> until the setup wizard is finished.</p></div>
+  </details>
+
+  <details data-k="unable to find a private key which matches reset step generated with previous csr ssl wizard">
+    <summary>SSL wizard: “Unable to find a private key which matches the public key” <span class="tag">HTTPS</span></summary>
+    <div class="body"><p><b>Cause:</b> a previous “No → CSR” attempt left a stored key (<code>Generated with previous CSR</code>), so the wizard compares your new certificate with the wrong key.</p>
+    <p><b>Fix:</b> at the private-key step click <b>Reset Step → Confirm</b>, supply the matching <code>ignition-key.pem</code>, then the certificate and CA again. Also confirm the certificate really belongs to that key (<code>keytool -list</code> shows one <code>PrivateKeyEntry</code> after importing the signed cert).</p></div>
+  </details>
+
+  <details data-k="import failed metadata discovery url idp gateway cannot reach trust adfs.example.local">
+    <summary>“Import Failed” when importing the AD FS metadata <span class="tag">IdP</span></summary>
+    <div class="body"><p>The <b>Gateway server</b> (not your browser) fetches that URL. It fails when the Gateway cannot <b>resolve</b> <code>adfs.example.local</code> (DNS), cannot <b>reach</b> 443, or does not <b>trust</b> the AD FS certificate (CA missing in the Gateway’s <code>cacerts</code>).</p>
+    <p>This happened first with a Gateway hosted elsewhere (<code>ignition.example.com</code>) that had no route/DNS to the internal AD FS. Once Ignition ran on the same network and the CA was imported (Step 7.4) it returned <b>IMPORT COMPLETE</b>. Test from the Gateway host: <code>Invoke-WebRequest https://adfs.example.local/adfs/.well-known/openid-configuration</code> and the Java trust import.</p></div>
+  </details>
+
+  <details data-k="username opaque sub random string unique_name mapping">
+    <summary>Username shows a long random string <span class="tag">mapping</span></summary>
+    <div class="body"><p>The default mapping uses <code>sub</code> for both ID and Username. Change <b>Username</b> to <code>unique_name</code> (Step 8.2); keep ID = <code>sub</code>. Existing sessions keep the old value until they re-login.</p></div>
+  </details>
+
+  <details data-k="roles empty role claim domain users list formatting overlapping">
+    <summary>Roles are empty or ugly <span class="tag">mapping</span></summary>
+    <div class="body"><p>The <b>Mapped User Attributes</b> test tab may omit roles, but <code>session.props.auth.user.roles</code> in a running session is populated: one entry per AD group. Each entry prints as a record (<code>[Domain Admins, Good_Unspecified, date]</code>), which wraps and overlaps other labels. The view’s script transform keeps only the first field of each entry (Appendix B). A group appears only if it is in the user’s token (<code>tokenGroups</code>), i.e. nested groups are included, distribution groups are not.</p></div>
+  </details>
+
+  <details data-k="blank page view not visible percent mode coord container designer canvas empty">
+    <summary>The Perspective page / Designer canvas is blank although labels exist <span class="tag">view</span></summary>
+    <div class="body"><p><b>Cause:</b> root container <code>props.mode = "percent"</code>. Pixel positions were treated as percentages. <code>get_page_text</code>/DOM shows the text, the screen shows nothing.</p>
+    <p><b>Fix:</b> set the root <code>props.mode</code> to <code>"fixed"</code> (Designer: container → <i>Mode: Fixed</i>), keep <code>defaultSize</code> sensible, restart or rescan.</p></div>
+  </details>
+
+  <details data-k="could not be compiled onstartup script indent tab">
+    <summary>Gateway: “Unable to run action ‘system.onStartup’ … code could not be compiled” <span class="tag">scripting</span></summary>
+    <div class="body"><p>Event scripts stored in <code>view.json</code> are function <b>bodies</b>: every line must begin with a TAB (<code>"\tif not …:\n\t\tsystem.perspective.login()"</code>). In the Designer this is automatic. (A startup <code>system.perspective.login()</code> script is a fallback only; the Authenticated permission already forces login.)</p></div>
+  </details>
+
+  <details data-k="page loads no login redirect public anonymous session permissions authenticated">
+    <summary>The project page opens without asking anyone to log in <span class="tag">project</span></summary>
+    <div class="body"><p>Default Perspective permissions allow <b>Public</b>. In the Designer set <i>Project Properties → Perspective → Permissions</i> to <b>Authenticated</b> only and save. Verify the file <code>com.inductiveautomation.perspective\session-permissions\data.bin</code> changed. A browser then shows <i>“You must log in to continue”</i>.</p></div>
+  </details>
+
+  <details data-k="designer perspective missing chromium jxbrowser exit code 0 de-elevate">
+    <summary>Designer has no Perspective node; console shows JxBrowser / “Process exit code: 0” <span class="tag">Designer</span></summary>
+    <div class="body"><p>See Step 10. Add <code>-Dignition.chromium.switch.do-not-de-elevate</code> to that gateway’s <b>JVM Arguments</b> in the Designer Launcher (Manage) and restart the Designer. Other fixes in vendor notes (clearing the jxbrowser cache, antivirus exclusions, free disk space for the temp folder) apply when the exit code or stack differs.</p></div>
+  </details>
+
+  <details data-k="designer missing input user source can't get roles from the gateway">
+    <summary>Designer: “Missing Input — Please select an user source” / “Can’t get roles from the gateway” <span class="tag">Designer</span></summary>
+    <div class="body"><p>Choose <code>default</code> as the project’s User Source (required by the dialog, unused for SSO). The second message is expected with an external IdP; the settings were saved (check the project files’ timestamps).</p></div>
+  </details>
+
+  <details data-k="launcher ssl certificate must be imported trust certificate designer launcher">
+    <summary>Designer Launcher: “SSL Certificate must be imported” <span class="tag">Launcher</span></summary>
+    <div class="body"><p>The launcher uses its own Java trust. Click <b>Trust Certificate</b> after checking the subject, issuer (<code>example-CA</code>) and dates. It remembers the choice per gateway entry.</p></div>
+  </details>
+
+  <details data-k="changes not appearing view edit restart scan file system designer overwrite cache">
+    <summary>My edits to project files do not show up <span class="tag">projects</span></summary>
+    <div class="body"><p>The Gateway caches project resources. Use <i>Platform → System → Projects → Scan File System</i> (needs admin login) or <code>Restart-Service Ignition</code> (~1 min, sessions drop). Close the Designer first — saving from a stale Designer overwrites hand-edited files. Keep backups (the <code>.bak</code> copies in <code>C:\adfs-setup</code> were made before each change).</p></div>
+  </details>
+
+  <details data-k="hasp license warning trial mode reset 2 hours">
+    <summary>Log: “Could not read license from HASP key”; “Trial time reset” <span class="tag">licence</span></summary>
+    <div class="body"><p>Informational on a trial/unlicensed Gateway. The 2-hour trial is reset by restarting the Gateway; activate a licence for production.</p></div>
+  </details>
+
+  <h3>C · The SSO itself (client side)</h3>
+
+  <details data-k="password form prompt instead of silent sso wia kerberos intranet zone auth server allowlist user agent spn" open>
+    <summary>Edge/Chrome shows the AD FS <b>password form</b> instead of signing in silently <span class="tag">SSO</span></summary>
+    <div class="body">
+      <p>Work through these in order — the first one that is wrong is almost always the cause.</p>
+      <div class="tablewrap"><table>
+        <tr><th>#</th><th>Check</th><th>How</th><th>Fix</th></tr>
+        <tr><td>1</td><td>Client is domain-joined and the user logged on with a <b>domain</b> account</td><td><code>whoami</code> → <code>EXAMPLE\user</code>; <code>systeminfo | findstr Domain</code></td><td>Join the domain; do not use a local account or RDP with saved local creds.</td></tr>
+        <tr><td>2</td><td>URL uses the <b>FQDN</b>, not an IP / short name / <code>localhost</code></td><td>Address bar</td><td>Use <code>adfs.example.local</code> / <code>ignition.example.local</code>.</td></tr>
+        <tr><td>3</td><td>AD FS in the <b>Intranet</b> zone</td><td><code>inetcpl.cpl</code> → Local intranet → Sites; <code>gpresult /h gp.html</code></td><td>Step 5 GPO linked and applied (<code>gpupdate /force</code>, re-logon).</td></tr>
+        <tr><td>4</td><td>Browser allowed to use Negotiate</td><td><code>edge://policy</code> → <code>AuthServerAllowlist</code></td><td>Step 5 values; Firefox needs its own setting.</td></tr>
+        <tr><td>5</td><td>AD FS accepts the browser (<b>User-Agent</b>)</td><td><code>(Get-AdfsProperties).WIASupportedUserAgents</code></td><td>Add <code>Mozilla/5.0</code>; <code>Restart-Service adfssrv</code>.</td></tr>
+        <tr><td>6</td><td>Intranet auth provider includes Windows auth</td><td><code>(Get-AdfsGlobalAuthenticationPolicy).PrimaryIntranetAuthenticationProvider</code></td><td>Must contain <code>WindowsAuthentication</code>.</td></tr>
+        <tr><td>7</td><td>SPN exists once</td><td><code>setspn -L adfs-svc</code>; <code>setspn -X</code></td><td>Remove duplicates (<code>setspn -D</code>); the host SPN is created by the farm install.</td></tr>
+        <tr><td>8</td><td>Time within 5 minutes of the DC</td><td><code>w32tm /query /status</code></td><td>Fix NTP; Hyper-V time-sync.</td></tr>
+        <tr><td>9</td><td>The browser is not running “as another user”/InPrivate with different rules; no proxy intercepts</td><td>Normal window; <code>netsh winhttp show proxy</code></td><td>Bypass the proxy for <code>*.example.local</code>.</td></tr>
+      </table></div>
+      <p>To see what AD FS did, open the <b>AD FS/Admin</b> log right after a failed attempt and the DC’s Security log (4768/4769). If you see an NTLM logon (4624, package NTLM) instead of Kerberos tickets, check 2, 7 and 3.</p>
+    </div>
+  </details>
+
+  <details data-k="blank white page adfs wia embedded browser negotiate pane">
+    <summary>The page goes blank on <code>/adfs/oauth2/authorize/wia</code> <span class="tag">SSO</span></summary>
+    <div class="body"><p>That endpoint is the Windows-authentication challenge. A real Windows browser handles it silently. Embedded or automation browsers (the preview pane used while building this) cannot negotiate and sit on a blank page. Test in Edge/Chrome. (In that same pane the normal AD FS <i>form</i> login still worked, which is how the first end-to-end test was done.)</p></div>
+  </details>
+
+  <details data-k="certificate warning client does not trust ca ssl not trusted root example-ca">
+    <summary>Browser shows a certificate warning for AD FS or Ignition <span class="tag">TLS</span></summary>
+    <div class="body"><p>The client does not trust <code>example-CA</code> (non-domain PC, or the Enterprise CA root is not in <i>Trusted Root</i>). On a domain PC: <code>certutil -pulse</code>/<code>gpupdate</code>. On others import <code>example-ca.cer</code> into <i>Local Machine → Trusted Root Certification Authorities</i> (<code>certutil -addstore -f Root example-ca.cer</code>). Also confirm the browser URL name appears in the certificate’s <b>SAN</b>. Note: the template’s certificates only advertise an <b>LDAP</b> CRL/AIA location, so non-domain machines cannot check revocation unless you publish HTTP CDP/AIA.</p></div>
+  </details>
+
+  <details data-k="redirect uri mismatch invalid client secret oauth error adfs msis9224 token endpoint">
+    <summary>AD FS error page / Ignition login ends with an OAuth error <span class="tag">OIDC</span></summary>
+    <div class="body"><ul>
+      <li><b>Redirect URI mismatch</b> — compare <code>Get-AdfsServerApplication</code> <code>RedirectUri</code> with Ignition’s printed URI (scheme, host, port, path). Fix with <code>Set-AdfsServerApplication -RedirectUri</code>.</li>
+      <li><b>Wrong/expired secret</b> (<i>invalid_client</i> from the token endpoint; Ignition’s log shows a failed token exchange) — generate a new one: <code>Set-AdfsServerApplication -TargetName 'Ignition Gateway - Server app' -ResetClientSecret</code>, then paste the new value into the Ignition IdP.</li>
+      <li><b>Scope not granted</b> — re-run <code>Grant-AdfsApplicationPermission … -ScopeNames openid,profile,email,allatclaims</code>.</li>
+      <li><b>Ignition cannot reach/trust AD FS</b> — Step 7.4 and DNS from the Gateway host.</li>
+      <li>Always read the matching event in <i>AD FS/Admin</i>; it names the failing field.</li>
+    </ul></div>
+  </details>
+
+  <details data-k="adfs add-adfsapplicationgroup not recognized new-adfsapplicationgroup cmdlet name">
+    <summary><code>Add-AdfsApplicationGroup</code> is not recognised <span class="tag">cmdlet</span></summary>
+    <div class="body"><p>The cmdlet is <code>New-AdfsApplicationGroup</code>. The server/web-API cmdlets are <code>Add-AdfsServerApplication</code> / <code>Add-AdfsWebApiApplication</code>. A wrong name makes every following command fail with “No application group found with identifier …” and a script can still write an <i>empty</i> secret file — delete it and re-run.</p></div>
+  </details>
+
+  <details data-k="logout sign out single logout session remains adfs sso silent re-login">
+    <summary>After “Sign out” the user is signed straight back in <span class="tag">behaviour</span></summary>
+    <div class="body"><p>Expected with SSO: logging out of Ignition does not end the AD FS/Windows session, so the next visit re-authenticates silently. Single logout is not configured. Users who must switch identity need to sign out of Windows or use a different browser profile; <i>Always ask the IdP to re-authenticate</i> (project setting) forces a prompt.</p></div>
+  </details>
+</section>
+
+<section id="prod">
+  <h2>Production &amp; security notes</h2>
+  <p class="lead">What is fine for a lab, and what should change before real use.</p>
+  <div class="cols">
+    <div class="card"><h4>Architecture</h4>
+      <ul>
+        <li>Put <b>AD FS</b>, the <b>CA</b>, <b>WSUS</b>, <b>Ignition</b> and Windows Admin Center on <b>separate servers</b>; keep the DC for AD/DNS only. Microsoft advises against a CA or AD FS on a domain controller.</li>
+        <li>Run AD FS on ≥2 nodes behind a load balancer; use a SQL back end if you need more than a few nodes. Publish via a proxy (Web Application Proxy / reverse proxy) only if you need external access.</li>
+        <li>Use a CA hierarchy (offline root + issuing CA) and publish <b>HTTP</b> CDP/AIA so every client can validate.</li>
+      </ul>
+    </div>
+    <div class="card"><h4>Secrets &amp; keys</h4>
+      <ul>
+        <li>The Ignition private key was displayed in the build session → <b>regenerate</b> the Ignition certificate and key.</li>
+        <li>Plain-text files in <code>C:\adfs-setup</code> (<code>ignition-client-secret.txt</code>, <code>ssotest-password.txt</code>, <code>ign\*.pem/.p12/password</code>, scripts and logs) must be moved to a vault or deleted; keep only what you need.</li>
+        <li>Store the client secret using Ignition’s <i>Secret Providers</i> instead of “Embedded”. Rotate it on a schedule.</li>
+        <li>Replace the lab test user; use named domain groups and map them to <b>Security Levels</b>/roles.</li>
+      </ul>
+    </div>
+    <div class="card"><h4>Operations</h4>
+      <ul>
+        <li>Certificate expiries: AD FS service cert <b>2028-10-01</b>, Ignition cert <b>2028-10-01</b>, AD FS token-signing/decrypting <b>2027-10-02</b> (self-managed, auto-rollover on). Calendar them.</li>
+        <li>After renewing the AD FS cert: <code>Set-AdfsSslCertificate -Thumbprint …</code> on every node, restart <code>adfssrv</code>.</li>
+        <li>Back up AD FS (system state / WID), the CA (database + key), and an Ignition Gateway backup (Platform → Backup &amp; Restore).</li>
+        <li>Re-apply the Java CA import and Designer JVM flag after Ignition upgrades.</li>
+        <li>Enable <i>Force Secure Redirect</i> and keep 8088 closed; consider disabling HTTP completely.</li>
+        <li>Licence Ignition (trial resets every 2 h).</li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout warn"><b>Not covered</b> Multi-factor authentication, single logout, device registration / Workplace Join, SAML, and non-Windows/non-domain clients (those fall back to the AD FS forms login). AD FS can add MFA providers; Ignition then simply receives the same token.</div>
+</section>
+
+<section id="appx-script">
+  <h2>Appendix A · Rebuild script (assembled from the tested steps)</h2>
+  <p class="lead">One place to copy from. It is the same commands as above, grouped into phases with the required restarts marked. Run it <b>phase by phase</b> in an elevated Windows PowerShell 5.1, reading the output between phases — it was not executed as a single script.</p>
+  <div class="codewrap"><span class="label">Build-SSO.ps1</span><button class="copy">Copy</button><pre><code># ====== EDIT THESE ======
+$Domain   = 'example.local'; $NetBIOS = 'EXAMPLE'
+$DcName   = 'DC01'; $Ip = '10.0.0.10'
+$AdfsHost = "adfs.$Domain";    $IgnHost = "ignition.$Domain"; $IgnPort = 8043
+$CaConfig = "$DcName.$Domain\example-CA"
+$Work     = 'C:\adfs-setup'; New-Item -ItemType Directory -Force $Work | Out-Null
+
+# ====== PHASE 1: DNS, KDS key, gMSA, role ======
+foreach ($h in 'adfs','ignition') { if (-not (Get-DnsServerResourceRecord -ZoneName $Domain -Name $h -ErrorAction SilentlyContinue)) { Add-DnsServerResourceRecordA -ZoneName $Domain -Name $h -IPv4Address $Ip } }
+Set-DnsClientServerAddress -InterfaceAlias 'Ethernet 2' -ServerAddresses $Ip   # the DC resolves via itself
+if (-not (Get-KdsRootKey)) { Add-KdsRootKey -EffectiveTime ((Get-Date).AddHours(-10)) }   # lab only
+New-ADServiceAccount -Name adfs-svc -DNSHostName $AdfsHost -PrincipalsAllowedToRetrieveManagedPassword ($DcName + '$')
+Set-ADServiceAccount adfs-svc -KerberosEncryptionType AES128,AES256
+$cfg = (Get-ADRootDSE).configurationNamingContext
+dsacls "CN=WebServer,CN=Certificate Templates,CN=Public Key Services,CN=Services,$cfg" /G "${NetBIOS}\Domain Controllers:CA;Enroll"
+Get-Certificate -Template WebServer -DnsName $AdfsHost,"certauth.$AdfsHost" -SubjectName "CN=$AdfsHost" -CertStoreLocation Cert:\LocalMachine\My
+Install-WindowsFeature ADFS-Federation -IncludeManagementTools
+# &gt;&gt;&gt; RESTART the server now &lt;&lt;&lt;
+
+# ====== PHASE 2: free 443 (only if WAC/IIS holds it), gMSA, farm, UA list ======
+# (WAC) edit appsettings.json: Url https://*:443 -> 6443 and HttpSysUrls https://+:443 -> 6443 ; Restart-Service WindowsAdminCenter
+Install-ADServiceAccount adfs-svc ; if (-not (Test-ADServiceAccount adfs-svc)) { throw 'gMSA not usable - see Troubleshooting' }
+$thumb = (Get-ChildItem Cert:\LocalMachine\My | Where Subject -eq "CN=$AdfsHost" | Select -First 1).Thumbprint
+Install-AdfsFarm -CertificateThumbprint $thumb -FederationServiceName $AdfsHost -FederationServiceDisplayName 'Example SSO' `
+  -GroupServiceAccountIdentifier "$NetBIOS\adfs-svc`$" -OverwriteConfiguration -Confirm:$false
+# &gt;&gt;&gt; RESTART again if asked &lt;&lt;&lt;
+$ua = (Get-AdfsProperties).WIASupportedUserAgents
+if ($ua -notcontains 'Mozilla/5.0') { Set-AdfsProperties -WIASupportedUserAgents ($ua + 'Mozilla/5.0') }
+Restart-Service adfssrv
+
+# ====== PHASE 3: OIDC client for Ignition ======
+$clientId = 'ignition-perspective'
+$redirect = "https://${IgnHost}:${IgnPort}/data/federate/callback/oidc"
+New-AdfsApplicationGroup -Name 'Ignition SCADA' -ApplicationGroupIdentifier $clientId
+$app = Add-AdfsServerApplication -Name 'Ignition Gateway - Server app' -ApplicationGroupIdentifier $clientId -Identifier $clientId -RedirectUri $redirect -GenerateClientSecret
+Set-Content "$Work\ignition-client-secret.txt" $app.ClientSecret -Encoding ASCII
+icacls "$Work\ignition-client-secret.txt" /inheritance:r /grant:r "Administrators:F" "SYSTEM:F" | Out-Null
+Add-AdfsWebApiApplication -Name 'Ignition Gateway - Web API' -ApplicationGroupIdentifier $clientId -Identifier $clientId -AccessControlPolicyName 'Permit everyone'
+# $rules = (the two claim rules from Step 4) ; Set-AdfsWebApiApplication -TargetName 'Ignition Gateway - Web API' -IssuanceTransformRules $rules
+Grant-AdfsApplicationPermission -ClientRoleIdentifier $clientId -ServerRoleIdentifier $clientId -ScopeNames 'openid','profile','email','allatclaims'
+
+# ====== PHASE 4: GPO + firewall + test user ======
+# (GPO commands from Step 5) ; New-NetFirewallRule ... -LocalPort $IgnPort (Step 6)
+$pw = -join ((65..90)+(97..122)+(48..57) | Get-Random -Count 14 | % {[char]$_}); $pw += 'a1!Z'
+New-ADUser -Name 'SSO Test' -SamAccountName ssotest -UserPrincipalName "ssotest@$Domain" -EmailAddress "ssotest@$Domain" `
+  -AccountPassword (ConvertTo-SecureString $pw -AsPlainText -Force) -Enabled $true -PasswordNeverExpires $true -Path "CN=Users,$((Get-ADDomain).DistinguishedName)"
+Set-Content "$Work\ssotest-password.txt" $pw -Encoding ASCII
+icacls "$Work\ssotest-password.txt" /inheritance:r /grant:r "Administrators:F" "SYSTEM:F" | Out-Null
+
+# ====== PHASE 5 (after installing Ignition, Step 7): Ignition certificate (Step 2.4), SSL wizard, cacerts import (Step 7.4) ======
+# ====== PHASE 6: Ignition IdP, attribute mapping, project, permissions, view (Steps 8-10) - done in the web UI / Designer ======</code></pre></div>
+</section>
+
+<section id="appx-view">
+  <h2>Appendix B · The page, as a script</h2>
+  <p class="lead">Generates the <code>Main</code> view (fixed layout, bindings, roles transform). Run with the Designer closed, then restart the Gateway or Scan File System.</p>
+  <div class="codewrap"><span class="label">Make-View.ps1</span><button class="copy">Copy</button><pre><code>$f = 'C:\Program Files\Inductive Automation\Ignition\data\projects\SSOTest\com.inductiveautomation.perspective\views\Main\view.json'
+New-Item -ItemType Directory -Force (Split-Path $f) | Out-Null
+
+function Label($name,$x,$y,$w,$h,$expr,$size,$bold,$color,$text) {
+  $style = [ordered]@{ fontSize = $size; color = $color }
+  if ($bold) { $style['fontWeight'] = 'bold' }
+  $c = [ordered]@{ meta = @{ name = $name }; position = [ordered]@{ x=$x; y=$y; width=$w; height=$h }; type = 'ia.display.label' }
+  if ($expr) {
+    $c['propConfig'] = @{ 'props.text' = @{ binding = [ordered]@{ type = 'expr'; config = @{ expression = $expr } } } }
+    $c['props'] = @{ style = $style }
+  } else {
+    $c['props'] = [ordered]@{ style = $style }
+    if ($text) { $c['props']['text'] = $text }
+  }
+  $c
+}
+
+$children = @(
+  (Label 'Heading'     30  25 640 40 $null 14 $false '#6b7280' 'SIGNED IN WITH WINDOWS SSO (AD FS)'),
+  (Label 'Welcome'     30  65 640 60 '"Welcome, " + {session.props.auth.user.userName}' 40 $true '#111827' $null),
+  (Label 'UsernameRow' 30 150 640 34 '"Username:  " + {session.props.auth.user.userName}' 20 $false '#111827' $null),
+  (Label 'EmailRow'    30 190 640 34 '"Email:  " + {session.props.auth.user.email}' 20 $false '#111827' $null),
+  (Label 'RolesRow'    30 230 640 90 $null 18 $false '#111827' $null),
+  (Label 'IdpRow'      30 335 640 34 '"Identity provider:  " + {session.props.auth.idp}' 20 $false '#111827' $null),
+  (Label 'AuthRow'     30 375 640 34 '"Authenticated:  " + toStr({session.props.auth.authenticated})' 20 $false '#111827' $null)
+)
+
+# Roles: join the group names (each role entry prints as "[Name, Good_Unspecified, timestamp]")
+$code = "`tnames = []`n`ttry:`n`t`tfor r in value:`n`t`t`tnames.append(str(r).strip('[]').split(',')[0].strip())`n`texcept:`n`t`tnames = [str(value)]`n`treturn 'Roles:  ' + ', '.join(names)"
+$roles = $children | Where { $_.meta.name -eq 'RolesRow' }
+$roles['propConfig'] = @{ 'props.text' = @{ binding = [ordered]@{ type = 'expr'; config = @{ expression = '{session.props.auth.user.roles}' }; transforms = @(@{ type = 'script'; code = $code }) } } }
+
+$view = [ordered]@{
+  custom = @{}; params = @{}
+  props  = @{ defaultSize = @{ width = 700; height = 440 } }
+  root   = [ordered]@{ type = 'ia.container.coord'; meta = @{ name = 'root' }
+                       props = @{ mode = 'fixed'; style = @{ backgroundColor = '#f3f4f6' } }
+                       children = $children }
+}
+[IO.File]::WriteAllText($f, ($view | ConvertTo-Json -Depth 30), (New-Object Text.UTF8Encoding($false)))
+
+# resource.json (note the "files" key!)
+$res = '{"scope":"G","version":1,"restricted":false,"overridable":true,"files":["view.json"],"attributes":{}}'
+[IO.File]::WriteAllText((Join-Path (Split-Path $f) 'resource.json'), $res, (New-Object Text.UTF8Encoding($false)))</code></pre></div>
+  <p>Page configuration (<code>page-config\config.json</code>) is <code>{"pages":{"/":{"viewPath":"Main"}}}</code> with a <code>resource.json</code> listing <code>config.json</code>. The Designer writes both for you.</p>
+</section>
+
+<section id="appx-files">
+  <h2>Appendix C · Files &amp; paths</h2>
+  <div class="tablewrap"><table>
+    <tr><th>Path</th><th>What it is</th></tr>
+    <tr><td><code>C:\adfs-setup\step1…step10.ps1 / .log</code></td><td>The scripts that were run during the build and their transcripts — they include <b>failed first attempts</b> (e.g. step 3, 5, 9, 10), so use the commands in this guide, not the scripts, to rebuild. Transcripts (step 1 DNS/KDS/gMSA/cert/role; 2 template permission/WAC; 4 DC enroll; 5–6 farm; 7 app registration; 8 WSL attempt; 9 Ignition certificate; 10 installer).</td></tr>
+    <tr><td><code>C:\adfs-setup\example-ca.cer</code></td><td>The CA certificate (public). Import on clients / Ignition.</td></tr>
+    <tr><td><code>C:\adfs-setup\ignition-client-secret.txt</code></td><td>OIDC client secret (sensitive).</td></tr>
+    <tr><td><code>C:\adfs-setup\ssotest-password.txt</code></td><td>Test user password (sensitive).</td></tr>
+    <tr><td><code>C:\adfs-setup\ign\</code></td><td>Ignition certificate work: <code>ignition.p12</code>, <code>keystore-password.txt</code>, <code>ignition-key.pem</code>, <code>ignition-cert.pem</code>, <code>example-ca.pem</code>, CSR and signed cert (key material — sensitive).</td></tr>
+    <tr><td><code>C:\adfs-setup\appsettings.json.bak</code>, <code>cacerts.bak</code>, <code>view.json.bak*</code></td><td>Backups taken before editing WAC settings, the Java trust store and the view.</td></tr>
+    <tr><td><code>C:\Program Files\Inductive Automation\Ignition\</code></td><td>Install dir. <code>data\gateway.xml</code> (ports), <code>data\projects\SSOTest\…</code> (project), <code>data\config\resources\core\ignition\identity-provider\…</code> (IdP config), <code>logs\wrapper.log</code>, <code>lib\runtime\jre-win\…</code> (bundled Java + <code>keytool</code>, <code>lib\security\cacerts</code>).</td></tr>
+    <tr><td><code>C:\Program Files\WindowsAdminCenter\Service\appsettings.json</code></td><td>WAC port settings (now 6443).</td></tr>
+    <tr><td><code>%USERPROFILE%\.ignition\</code></td><td>Designer Launcher cache and settings, downloaded Designer modules (including <code>cache\resources\jxbrowser</code>), <code>clientlauncher-data\designer-launcher.json</code>.</td></tr>
+    <tr><td>GPO <code>SSO - AD FS Intranet Zone</code></td><td>Group Policy Management → domain root link.</td></tr>
+    <tr><td>Scheduled task <code>TmpCsr</code></td><td>Created and removed during certificate signing; should not exist afterwards.</td></tr>
+  </table></div>
+  <div class="callout note"><b>Not part of the final solution</b> An earlier attempt to run Ignition in Docker (WSL2) failed because the Hyper-V VM had no nested virtualization (<code>HCS_E_HYPERV_NOT_INSTALLED</code>) — Ignition was installed natively instead. Ubuntu was downloaded into WSL but no distribution is registered. The earlier Gateway <code>ignition.example.com</code> was a different, remote server and is unrelated to this build.</div>
+</section>
+
+<section id="refs">
+  <h2>Appendix D · References</h2>
+  <ul>
+    <li><a href="https://www.docs.inductiveautomation.com/docs/8.3/platform/security/identity-provider-authentication-strategy/configuring-identity-providers">Ignition 8.3 — Configuring Identity Providers</a> (OIDC/SAML, redirect URIs, metadata import)</li>
+    <li><a href="https://www.docs.inductiveautomation.com/docs/8.3/platform/security/identity-provider-authentication-strategy/configuring-identity-providers/user-attribute-mapping">Ignition 8.3 — User Attribute Mapping</a></li>
+    <li><a href="https://www.docs.inductiveautomation.com/docs/8.3/platform/security/identity-provider-authentication-strategy/security-level-rules">Ignition 8.3 — Security Level Rules</a></li>
+    <li><a href="https://www.docs.inductiveautomation.com/docs/8.3/appendix/scripting-functions/system-perspective/system-perspective-login"><code>system.perspective.login</code></a></li>
+    <li><a href="https://docs.inductiveautomation.com/docs/8.3/getting-started/startup-guide/downloading-and-installing-ignition">Ignition 8.3 — Downloading and installing</a></li>
+    <li><a href="https://www.docs.inductiveautomation.com/docs/deprecated/platform/security/sso-enabled">Deprecated: “SSO Enabled” property</a> (why a direct Windows SSO is not offered)</li>
+    <li><a href="https://forum.inductiveautomation.com/t/designer-fails-to-start-perspective-module/113424">Forum: Designer fails to start the Perspective module</a> (the Chromium de-elevation flag)</li>
+    <li>Microsoft Learn (search by title): <i>Configure AD FS browsers for Windows Integrated Authentication</i>, <i>Create the KDS root key</i>, <i>Get started with group managed service accounts</i>, <i>AD FS OpenID Connect / OAuth flows and application scenarios</i>.</li>
+  </ul>
+  <footer>Windows SSO for Ignition Perspective · written from a working lab build on 2 Oct 2026 · host names and addresses are specific to that lab — see section 2 to adapt.</footer>
+</section>
+
+</main>
+</div>
+
+<script>
+(function(){
+  // Copy buttons
+  document.querySelectorAll('.codewrap').forEach(function(w){
+    var b = w.querySelector('button.copy'); if(!b) return;
+    b.addEventListener('click', function(){
+      var t = w.querySelector('code').innerText;
+      var done = function(){ b.textContent='Copied'; setTimeout(function(){ b.textContent='Copy'; },1400); };
+      if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(t).then(done, fallback); } else { fallback(); }
+      function fallback(){ var ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta); ta.select(); try{document.execCommand('copy');}catch(e){} document.body.removeChild(ta); done(); }
+    });
+  });
+  // Active TOC link
+  var links = Array.prototype.slice.call(document.querySelectorAll('nav.toc a[href^="#"]'));
+  var map = {}; links.forEach(function(a){ map[a.getAttribute('href').slice(1)] = a; });
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function(es){
+      es.forEach(function(e){ if(e.isIntersecting){ links.forEach(function(a){a.classList.remove('active');}); var a=map[e.target.id]; if(a) a.classList.add('active'); } });
+    }, {rootMargin:'-10% 0px -80% 0px'});
+    document.querySelectorAll('main section[id]').forEach(function(s){ io.observe(s); });
+  }
+  // Troubleshooting filter
+  var q = document.getElementById('search');
+  if (q) q.addEventListener('input', function(){
+    var v = q.value.trim().toLowerCase();
+    document.querySelectorAll('#trouble details').forEach(function(d){
+      var hay = (d.textContent + ' ' + (d.getAttribute('data-k')||'')).toLowerCase();
+      var hit = !v || hay.indexOf(v) > -1;
+      d.style.display = hit ? '' : 'none';
+      if (v && hit) d.setAttribute('open',''); else if (!v) d.removeAttribute('open');
+    });
+  });
+  // Print: open all details
+  window.addEventListener('beforeprint', function(){ document.querySelectorAll('details').forEach(function(d){ d.setAttribute('open',''); }); });
+})();
+</script>
+</body>
+</html>
